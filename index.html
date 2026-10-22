@@ -468,8 +468,8 @@ body.dragging { -webkit-user-select: none; user-select: none; }
 // ==========================================
 // KREDENSIAL SUPABASE
 // ==========================================
-const SUPABASE_URL = "https://xjrszqdptyqpzlgfgtrq.supabase.co/"; // URL Supabase Anda[cite: 3]
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqcnN6cWRwdHlxcHpsZ2ZndHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2OTQ1MDgsImV4cCI6MjEwODI3MDUwOH0.kZSn1Q1gtispQolLUv0zjjndLQogGnvxZ6spXjs4FOE"; // Anon Key Anda
+const SUPABASE_URL = "https://xjrszqdptyqpzlgfgtrq.supabase.co/"; 
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqcnN6cWRwdHlxcHpsZ2ZndHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2OTQ1MDgsImV4cCI6MjEwODI3MDUwOH0.kZSn1Q1gtispQolLUv0zjjndLQogGnvxZ6spXjs4FOE"; 
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -776,7 +776,7 @@ function toast(kind, title, sub) {
 }
 
 // ==========================================
-// PENGGANTI SUPABASE UNTUK GOOGLE APPS SCRIPT
+// SUPABASE FUNCTION
 // ==========================================
 var save = function() {
   try { localStorage.setItem(K, JSON.stringify(R)); } catch(e){}
@@ -849,6 +849,34 @@ var isSet = function(c) { return c.set === true || c.last > 0 || c.lastDate !== 
 
 var today = function() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 var dayDiff = function(d) { return Math.round((new Date(today() + 'T00:00:00') - new Date(d + 'T00:00:00')) / 864e5); };
+
+// ==========================================
+// HELPER AGO (PERBAIKAN ERROR "ago is not defined")
+// ==========================================
+var ago = function(d) {
+  if (!d) return '';
+  var diff = dayDiff(d);
+  if (diff === 0) return 'hari ini';
+  if (diff === 1) return 'kemarin';
+  if (diff < 7) return diff + ' hari lalu';
+  if (diff < 30) return Math.floor(diff / 7) + ' minggu lalu';
+  if (diff < 365) return Math.floor(diff / 30) + ' bulan lalu';
+  return Math.floor(diff / 365) + ' tahun lalu';
+};
+
+function age(d) {
+  if (!d) return '';
+  var a = new Date(d + 'T00:00:00'), n = new Date(today() + 'T00:00:00');
+  if (isNaN(a.getTime()) || a > n) return '';
+  var y = n.getFullYear() - a.getFullYear(), m = n.getMonth() - a.getMonth(), dd = n.getDate() - a.getDate();
+  if (dd < 0) { m--; dd += new Date(n.getFullYear(), n.getMonth(), 0).getDate(); }
+  if (m < 0) { y--; m += 12; }
+  var p = [];
+  if (y) p.push(y + ' thn');
+  if (m) p.push(m + ' bln');
+  if (dd || !p.length) p.push(dd + ' hr');
+  return p.join(' ');
+}
 
 function partAgeStr(d) {
   if (!d) return '';
