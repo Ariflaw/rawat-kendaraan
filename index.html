@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Rawat Kendaraan</title>
-<link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
-<link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-<link href="[https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap)" rel="stylesheet">
-<script src="[https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2](https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2)"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --bg-main: #f8fafc; --bg-card: #ffffff; --bg-subtle: #f1f5f9; --text-main: #0f172a;
@@ -18,17 +18,14 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
   -webkit-tap-highlight-color: transparent; box-sizing: border-box;
 }
-
 [data-theme="dark"] {
   --bg-main: #0f172a; --bg-card: #1e293b; --bg-subtle: #334155; --text-main: #f8fafc;
   --text-muted: #94a3b8; --border-color: #334155; --primary: #38bdf8; --primary-hover: #7dd3fc;
   --primary-light: #0c4a6e; --wa-light: #78350f; --er-light: #7f1d1d;
 }
-
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
 body { margin: 0; background: var(--bg-main); color: var(--text-main); padding-bottom: 84px; }
 .w { max-width: 600px; margin: auto; padding: 12px; }
-
 .app-header { display: flex; align-items: center; justify-content: space-between; margin: 2px 0 14px; }
 .brand { display: flex; align-items: center; gap: 12px; }
 .logo { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, var(--primary), var(--primary-hover)); cursor: pointer; position: relative; }
@@ -38,24 +35,17 @@ body { margin: 0; background: var(--bg-main); color: var(--text-main); padding-b
 .sdot.er { display: block; background: var(--er-bg); }
 .sdot.busy { display: block; background: var(--wa-bg); animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: .3; } }
-
 .app-title { font-size: 21px; font-weight: 800; margin: 0; }
 .theme-btn { width: 42px; height: 42px; border-radius: 50%; font-size: 18px; border: 1px solid var(--border-color); background: var(--bg-subtle); color: var(--text-main); cursor: pointer; display: grid; place-items: center; }
-
 .c { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: var(--shadow-sm); }
 .row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .mu { color: var(--text-muted); font-size: 11px; }
-
 input, select, button { font-size: 13px; border-radius: 8px; padding: 8px 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); min-height: 38px; outline: none; }
 button { cursor: pointer; font-weight: 600; }
 button.p { background: var(--primary); color: #fff; border: none; font-weight: 700; }
-
 .plate { display: inline-block; background: var(--text-main); color: var(--bg-card); border-radius: 5px; padding: 1px 6px; font-weight: 800; font-size: 12px; }
 .b { display: inline-flex; align-items: center; justify-content: center; padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
-.b.ok { background: var(--ok-bg); color: #fff; }
-.b.wa { background: var(--wa-bg); color: #fff; }
-.b.er { background: var(--er-bg); color: #fff; }
-
+.b.ok { background: var(--ok-bg); color: #fff; } .b.wa { background: var(--wa-bg); color: #fff; } .b.er { background: var(--er-bg); color: #fff; }
 .toast { position: fixed; left: 50%; top: 12px; transform: translate(-50%, -150%); z-index: 300; width: calc(100% - 24px); max-width: 420px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: var(--bg-card); border: 1.5px solid var(--border-color); box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none; transition: all .3s cubic-bezier(.2,.9,.3,1.2); }
 .toast.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
 .ti { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 18px; flex: none; }
@@ -77,17 +67,13 @@ button.p { background: var(--primary); color: #fff; border: none; font-weight: 7
 <div id="toast" class="toast"></div>
 
 <script>
-// ==========================================
-// CONFIG SUPABASE (Ganti dengan Data Anda)
-// ==========================================
+// Masukkan kredensial Supabase Anda di sini
 const SUPABASE_URL = "https://xjrszqdptyqpzlgfgtrq.supabase.co/"; // URL Supabase Anda[cite: 3]
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqcnN6cWRwdHlxcHpsZ2ZndHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2OTQ1MDgsImV4cCI6MjEwODI3MDUwOH0.kZSn1Q1gtispQolLUv0zjjndLQogGnvxZ6spXjs4FOE"; // Anon Key Anda
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let R = { vehicles: [] };
-let busy = false;
-
 const $ = s => document.querySelector(s);
 
 function syncStatus(type, msg) {
@@ -105,7 +91,6 @@ function toast(kind, title, sub) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// 1. Fungsi Ambil Data dari Supabase (Super Cepat < 0.5 detik)
 async function loadData() {
   syncStatus('busy', 'Memuat data...');
   try {
@@ -116,27 +101,21 @@ async function loadData() {
       .single();
 
     if (error && error.code !== 'PGRST116') throw error;
-
     if (data && data.data) {
       R = data.data;
-      localStorage.setItem('servisMotor_v1', JSON.stringify(R));
       syncStatus('ok', 'Tersinkron dengan Supabase');
     } else {
       syncStatus('ok', 'Database baru');
     }
   } catch (err) {
-    console.error(err);
     syncStatus('er', 'Gagal memuat');
     toast('er', 'Gagal Sinkron', 'Menggunakan data lokal.');
   }
   render();
 }
 
-// 2. Fungsi Simpan Data ke Supabase
 async function saveData() {
-  localStorage.setItem('servisMotor_v1', JSON.stringify(R));
   syncStatus('busy', 'Menyimpan...');
-
   try {
     const { error } = await supabaseClient
       .from('app_state')
@@ -146,13 +125,11 @@ async function saveData() {
     syncStatus('ok', 'Tersimpan di Supabase');
     toast('ok', 'Tersimpan', 'Data berhasil diperbarui di Supabase');
   } catch (err) {
-    console.error(err);
     syncStatus('er', 'Gagal menyimpan');
     toast('er', 'Gagal Menyimpan', err.message);
   }
 }
 
-// 3. Render Aplikasi Sederhana
 function render() {
   const v = $('#v');
   const vehicles = R.vehicles || [];
@@ -191,7 +168,6 @@ $('#btnTheme').addEventListener('click', () => {
   $('#btnTheme').textContent = isDark ? '🌙' : '☀️';
 });
 
-// Load awal
 loadData();
 </script>
 </body>
