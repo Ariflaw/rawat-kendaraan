@@ -878,7 +878,7 @@ function st(c) {
 
   if (!(iv(c) > 0)) {
     var ageText0 = partAgeStr(c.lastDate), maxDays = c.mBulan > 0 ? Math.round(c.mBulan * 30.4) : 0;
-    if (!maxDays || !c.lastDate) return { i: 0, nx: null, sisa: 1e12, pct: 0, k: 'nu', t: c.mBulan > 0 ? 'Isi tanggal ganti' : 'Interval belum diisi', ageText: ageText0, timeOnly: true };
+    if (!maxDays || !c.lastDate) return { i: 0, nx: null, sisa: 1e9, pct: 0, k: 'nu', t: c.mBulan > 0 ? 'Isi tanggal ganti' : 'Interval belum diisi', ageText: ageText0, timeOnly: true };
     var sd = maxDays - dayDiff(c.lastDate);
     var k0 = sd < 0 ? 'er' : sd <= 30 ? 'wa' : 'ok';
     var t0 = sd < 0 ? 'Usia lewat ' + Math.max(1, Math.abs(Math.round(sd / 30.4))) + ' bln' : sd == 0 ? 'Ganti sekarang' : sd < 60 ? sd + ' hari lagi' : Math.round(sd / 30.4) + ' bln lagi';
@@ -1012,22 +1012,6 @@ function stnkBox() {
   (k.lain ? R_f('Biaya lain', rp(k.lain)) : '') +
   '<div class="kv tot"><span>Total perkiraan</span><b>' + rp(k.total) + '</b></div>' +
   '<div class="mu note">' + (cus ? 'Mode custom: angka sesuai isian Anda.' : 'Tarif standar regulasi PP 76/2020 & PMK 36/2008.') + ' Gunakan mode Custom jika nominal berbeda.</div></details>';
-}
-
-function ago(d) {
-  if (!d) return ''; var n = dayDiff(d); if (isNaN(n) || n < 0) return '';
-  if (n == 0) return 'hari ini'; if (n == 1) return 'kemarin'; if (n < 30) return n + ' hari lalu';
-  var m = Math.max(1, Math.floor(n / 30.4)); return m < 12 ? m + ' bulan lalu' : Math.floor(m / 12) + ' tahun lalu';
-}
-
-function age(d) {
-  if (!d) return null; var a = new Date(d + 'T00:00:00'), n = new Date();
-  if (isNaN(a.getTime()) || a > n) return null;
-  var y = n.getFullYear() - a.getFullYear(), m = n.getMonth() - a.getMonth(), dd = n.getDate() - a.getDate();
-  if (dd < 0) { m--; dd += new Date(n.getFullYear(), n.getMonth(), 0).getDate(); }
-  if (m < 0) { y--; m += 12; }
-  var o = []; if (y) o.push(y + ' thn'); if (m) o.push(m + ' bln'); if (!y) o.push(dd + ' hr');
-  return o.join(' ');
 }
 
 function ageBox() {
@@ -1385,6 +1369,13 @@ function svc() {
   (S.hist||[]).concat(S.comps).forEach(function(x) { if (x.brand && BR.indexOf(x.brand) === -1) BR.push(x.brand); });
   
   return getShopListHTML() +
+  '<div class="c" style="border: 2px dashed var(--primary); background: var(--primary-light); text-align: center; padding: 16px;">' +
+    '<b style="font-size: 14px; color: var(--primary);">🤖 Scan Nota Servis dengan AI</b>' +
+    '<div class="mu" style="margin: 4px 0 10px;">Unggah foto nota/struk, AI akan otomatis mengisi tanggal, KM, bengkel, dan rincian servis.</div>' +
+    '<input type="file" id="notaFile" accept="image/*" style="display:none;">' +
+    '<button class="p" id="btnScanNota" style="width: 100%; min-height: 42px;">📷 Unggah & Scan Foto Nota</button>' +
+    '<div id="scanStatus" class="mu" style="margin-top: 8px; font-weight: 700; display: none;">Memproses nota dengan Gemini AI...</div>' +
+  '</div>' +
   '<div class="c">' +
     '<div class="r">' +
       '<label>Tanggal<input id="sd" type="date" value="' + d + '"></label>' +
@@ -1691,6 +1682,13 @@ document.addEventListener('click', function(e) {
     return;
   }
 
+  var btnScan = e.target.closest ? e.target.closest('#btnScanNota') : null;
+  if (btnScan) {
+    var fileInput = $('#notaFile');
+    if (fileInput) fileInput.click();
+    return;
+  }
+
   var hvb = e.target.closest ? e.target.closest('[data-hv]') : null;
   if (hvb) { hisView = hvb.dataset.hv == 'stat' ? 'stat' : 'list'; draw(); return; }
   var hyb = e.target.closest ? e.target.closest('[data-hy]') : null;
@@ -1812,6 +1810,73 @@ document.addEventListener('input', function(e) {
 
 document.addEventListener('change', function(e) {
   var t = e.target, tr = t.closest ? t.closest('[data-id]') : null;
+  
+  if (t.id === 'notaFile' && t.files[0]) {
+    var file = t.files[0];
+    var reader = new FileReader();
+    var statusEl = $('#scanStatus');
+    var btnScan = $('#btnScanNota');
+    
+    if (statusEl) statusEl.style.display = 'block';
+    if (btnScan) btnScan.disabled = true;
+
+    reader.onload = async function(uploadEvent) {
+      var base64Image = uploadEvent.target.result;
+      try {
+        var response = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ base64Image: base64Image })
+        });
+        var result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error || 'Gagal memproses nota.');
+
+        var data = result.data;
+        if (data.date) { var sdEl = $('#sd'); if (sdEl) sdEl.value = data.date; }
+        if (data.km && data.km > 0) { var skEl = $('#sk'); if (skEl) skEl.value = data.km; }
+        if (data.shop) { var ssEl = $('#ss'); if (ssEl) ssEl.value = data.shop; }
+        if (data.note) { var snEl = $('#sn'); if (snEl) snEl.value = data.note; }
+
+        var allFetchedItems = (data.items || []).concat(data.extraItems || []);
+        allFetchedItems.forEach(function(item) {
+          var matchedComp = (S.comps || []).find(function(c) {
+            return c.name.toLowerCase().includes(item.name.toLowerCase()) || item.name.toLowerCase().includes(c.name.toLowerCase());
+          });
+          if (matchedComp) {
+            var chk = document.querySelector('[data-ck="' + matchedComp.id + '"]');
+            if (chk) {
+              chk.checked = true;
+              chk.closest('.it').classList.add('on');
+            }
+            var prInput = document.querySelector('[data-pr="' + matchedComp.id + '"]');
+            if (prInput) prInput.value = fn(item.price);
+          } else {
+            var xlist = $('#xlist');
+            if (xlist) {
+              xlist.insertAdjacentHTML('beforeend', xRow(xlist.querySelectorAll('.xi').length + 1, true));
+              var lastRow = xlist.lastElementChild;
+              var nameInp = lastRow.querySelector('.xn');
+              var priceInp = lastRow.querySelector('.xp');
+              if (nameInp) nameInp.value = item.name;
+              if (priceInp) priceInp.value = fn(item.price);
+            }
+          }
+        });
+
+        svcCount();
+        toast('ok', 'Scan Berhasil', 'Data nota berhasil diekstrak oleh AI Gemini.');
+      } catch (err) {
+        toast('er', 'Gagal Scan Nota', err.message);
+      } finally {
+        if (statusEl) statusEl.style.display = 'none';
+        if (btnScan) btnScan.disabled = false;
+        t.value = '';
+      }
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
+
   if (t.dataset.hi) { 
     var h = (S.hist||[]).find(function(x) { return x.id == t.dataset.hi; }), f = t.dataset.hf; 
     if (h) { 
