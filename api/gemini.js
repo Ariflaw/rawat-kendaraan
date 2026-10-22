@@ -1,86 +1,58 @@
-// api/gemini.js - Vercel Serverless Function
-export default async function handler(req, res) {
-  // Atur Header CORS agar bisa dipanggil frontend
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
+module.exports = async function handler(req, res) {
+  // Hanya menerima method POST
   if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
 
   try {
-    const { base64Image } = req.body;
-    if (!base64Image) {
-      return res.status(400).json({ success: false, error: 'Gambar base64 tidak ditemukan' });
-    }
-
-    // Ambil API Key dari Environment Variable Vercel
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ success: false, error: 'API Key Gemini belum diset di Vercel.' });
+      return res.status(500).json({ success: false, error: 'GEMINI_API_KEY belum dikonfigurasi di Vercel Environment Variables.' });
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    const promptText = "Analisis foto nota/faktur bengkel servis kendaraan ini. " +
-      "Ekstrak data dalam format JSON murni TANPA tanda markdown/backticks (seperti ```json): " +
-      "{" +
-      "  \"date\": \"YYYY-MM-DD\"," +
-      "  \"km\": nomor_km_jika_ada_atau_0," +
-      "  \"shop\": \"Nama Bengkel\"," +
-      "  \"note\": \"Catatan singkat / nomor plat / tipe kendaraan\"," +
-      "  \"items\": [{\"name\": \"Nama Komponen/Suku Cadang\", \"price\": nominal_angka}]," +
-      "  \"extraItems\": [{\"name\": \"Nama Jasa Servis/Lainnya\", \"price\": nominal_angka}]" +
-      "}";
-
-    const payload = {
-      contents: [{
-        parts: [
-          { text: promptText },
-          {
-            inline_data: {
-              mime_type: "image/jpeg",
-              data: base64Image
-            }
-          }
-        ]
-      }]
-    };
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json({ success: false, error: result.error?.message || 'Gagal dari Gemini AI' });
+    const { base64Image } = req.body;
+    if (!base64Image) {
+      return res.status(400).json({ success: false, error: 'Gambar tidak ditemukan.' });
     }
 
-    if (!result.candidates?.[0]?.content?.parts?.[0]?.text) {
-      return res.status(500).json({ success: false, error: 'Respon dari AI Gemini kosong.' });
-    }
+    // Ambil data base64 tanpa header data:image/...
+    const base64Data = base64Image.split(',')[1] || base64Image;
 
-    let textResponse = result.candidates[0].content.parts[0].text;
-    let cleanJson = textResponse.replace(/```json/g, "").replace(/```/g, "").trim();
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const firstOpen = cleanJson.indexOf('{');
-    const lastClose = cleanJson.lastIndexOf('}');
-    if (firstOpen !== -1 && lastClose !== -1) {
-      cleanJson = cleanJson.substring(firstOpen, lastClose + 1);
-    }
+    const prompt = `Analisis foto nota/struk servis kendaraan ini.
+    Ekstrak data dan kembalikan HANYA format JSON valid tanpa tanda backtick Markdown seperti contoh berikut:
+    {
+      "date": "YYYY-MM-DD",
+      "km": 12000,
+      "shop": "Nama Bengkel",
+      "note": "Catatan ringkas",
+      "items": [
+        {"name": "Oli mesin", "price": 50000}
+      ]
+    }`;
 
-    const parsedData = JSON.parse(cleanJson);
-    return res.status(200).json({ success: true, data: parsedData });
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          data: base64Data,
+          mimeType: "image/jpeg"
+        }
+      }
+    ]);
 
-  } catch (e) {
-    return res.status(500).json({ success: false, error: 'Server error: ' + e.toString() });
+    const text = result.response.text();
+    // Bersihkan format Markdown jika ada
+    const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const data = JSON.parse(cleanJson);
+
+    return res.status(200).json({ success: true, data: data });
+  } catch (error) {
+    console.error("Gemini Error:", error);
+    return res.status(500).json({ success: false, error: error.message || 'Gagal memproses gambar.' });
   }
-}
+};
