@@ -1,5 +1,3 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
 module.exports = async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
 
@@ -10,20 +8,15 @@ module.exports = async function handler(req, res) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ success: false, error: 'GEMINI_API_KEY belum dikonfigurasi di Vercel Environment Variables.' });
+      return res.status(500).json({ success: false, error: 'GEMINI_API_KEY belum dikonfigurasi di Vercel.' });
     }
 
     const { base64Image } = req.body || {};
     if (!base64Image) {
-      return res.status(400).json({ success: false, error: 'Gambar tidak ditemukan atau ukuran terlalu besar.' });
+      return res.status(400).json({ success: false, error: 'Gambar tidak ditemukan.' });
     }
 
     const base64Data = base64Image.split(',')[1] || base64Image;
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // Ganti menggunakan model gemini-1.5-flash yang stabil
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Analisis foto nota/struk servis kendaraan ini.
     Ekstrak data dan kembalikan HANYA format JSON valid tanpa tanda backtick Markdown seperti contoh berikut:
@@ -37,17 +30,37 @@ module.exports = async function handler(req, res) {
       ]
     }`;
 
-    const result = await model.generateContent([
-      prompt,
+    // Memanggil REST API Gemini secara langsung menggunakan model gemini-2.5-flash
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
-        inlineData: {
-          data: base64Data,
-          mimeType: "image/jpeg"
-        }
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inline_data: {
+                    mime_type: 'image/jpeg',
+                    data: base64Data
+                  }
+                }
+              ]
+            }
+          ]
+        })
       }
-    ]);
+    );
 
-    const text = result.response.text();
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error?.message || 'Gagal memproses gambar dari Google API.');
+    }
+
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
     const data = JSON.parse(cleanJson);
 
