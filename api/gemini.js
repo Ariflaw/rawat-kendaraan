@@ -1,7 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports = async function handler(req, res) {
-  // Hanya menerima method POST
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
@@ -9,7 +8,7 @@ module.exports = async function handler(req, res) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ success: false, error: 'GEMINI_API_KEY belum dikonfigurasi di Vercel Environment Variables.' });
+      return res.status(500).json({ success: false, error: 'GEMINI_API_KEY belum dikonfigurasi di Vercel.' });
     }
 
     const { base64Image } = req.body;
@@ -17,11 +16,11 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Gambar tidak ditemukan.' });
     }
 
-    // Ambil data base64 tanpa header data:image/...
     const base64Data = base64Image.split(',')[1] || base64Image;
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Menggunakan nama model Gemini 2.5 Flash terbaru dengan karakter strip standar (-)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `Analisis foto nota/struk servis kendaraan ini.
     Ekstrak data dan kembalikan HANYA format JSON valid tanpa tanda backtick Markdown seperti contoh berikut:
@@ -46,7 +45,6 @@ module.exports = async function handler(req, res) {
     ]);
 
     const text = result.response.text();
-    // Bersihkan format Markdown jika ada
     const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
     const data = JSON.parse(cleanJson);
 
