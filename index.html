@@ -68,7 +68,7 @@ body { margin: 0; background: var(--bg-main); color: var(--text-main); padding-b
 
 .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .app-title { font-size: 17px; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 6px; }
-.theme-btn { background: var(--bg-subtle); border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 99px; font-weight: 600; font-size: 11px; cursor: pointer; color: var(--text-main); }
+.theme-btn, .notif-btn { background: var(--bg-subtle); border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 99px; font-weight: 600; font-size: 11px; cursor: pointer; color: var(--text-main); display: inline-flex; align-items: center; justify-content: center; }
 
 .b { display: inline-flex; align-items: center; justify-content: center; gap: 3px; padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.2; box-shadow: 0 1px 2px rgba(0,0,0,0.08); max-width: 100%; text-overflow: ellipsis; overflow: hidden; }
 .b.ok { background: var(--ok-bg); color: var(--ok-text); }
@@ -143,10 +143,19 @@ nav button {
   gap: 2px; background: none; border: none; padding: 4px 1px; min-height: 48px;
   font-size: 10px; font-weight: 600; color: var(--text-muted); cursor: pointer;
   border-radius: 10px; transition: all 0.12s ease; touch-action: manipulation;
+  position: relative;
 }
 nav button svg { width: 20px; height: 20px; stroke-width: 2.2; fill: none; stroke: currentColor; transition: transform 0.12s ease; }
 nav button.on { color: var(--primary); font-weight: 800; background: var(--primary-light); }
 nav button.on svg { transform: translateY(-1px); }
+
+.nav-badge {
+  position: absolute; top: 3px; right: 22%;
+  background: var(--er-bg); color: #fff;
+  font-size: 9px; font-weight: 800; border-radius: 99px;
+  padding: 1px 5px; min-width: 15px; text-align: center;
+  line-height: 1.2; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
 
 html { width: 100%; max-width: 100%; overflow-x: hidden; overflow-x: clip; -webkit-text-size-adjust: 100%; }
 body { width: 100%; max-width: 100%; overflow-x: hidden; overflow-x: clip; }
@@ -309,7 +318,11 @@ body.typing #savesvc { position: static; box-shadow: none; }
 [data-theme="dark"] .logo svg { stroke: #0f172a; }
 .bm { min-width: 0; }
 .app-title { font-size: 21px; line-height: 1.1; font-weight: 800; letter-spacing: -.4px; margin: 0; display: block; }
-.theme-btn { flex: none; width: 42px; height: 42px; min-height: 0; padding: 0; border-radius: 50%; font-size: 18px; line-height: 1; display: grid; place-items: center; box-shadow: var(--shadow-sm); }
+
+.header-actions { display: flex; items-center; gap: 6px; }
+.theme-btn, .notif-btn { flex: none; width: 42px; height: 42px; min-height: 0; padding: 0; border-radius: 50%; font-size: 18px; line-height: 1; display: grid; place-items: center; box-shadow: var(--shadow-sm); }
+.notif-btn.active { background: var(--primary-light); border-color: var(--primary); }
+
 .sync { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--text-muted); max-width: 100%; }
 .sync .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--text-muted); }
 .sync .dot.ok { background: var(--ok-bg); }
@@ -457,7 +470,10 @@ body.dragging { -webkit-user-select: none; user-select: none; }
       <div class="logo" id="logoBtn" title="Ketuk untuk perbarui data"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg><span id="sync" class="sdot" role="status"></span></div>
       <h1 class="app-title">Rawat Kendaraan</h1>
     </div>
-    <button class="theme-btn" id="btnTheme" aria-label="Ganti tema terang/gelap" title="Ganti tema">🌙</button>
+    <div class="header-actions">
+      <button class="notif-btn" id="btnNotif" aria-label="Aktifkan Notifikasi Pengingat" title="Pengingat Notifikasi">🔔</button>
+      <button class="theme-btn" id="btnTheme" aria-label="Ganti tema terang/gelap" title="Ganti tema">🌙</button>
+    </div>
   </div>
   <div id="v"></div>
 </div>
@@ -550,7 +566,8 @@ function compSet(v) {
       if (k == 'mt' || k == 'sp') out.push(['Filter bensin', 24000, 24, 'Motor injeksi'], ['Bersih throttle body', 12000, 12, 'Motor injeksi']);
       out.push(['Kampas rem depan', k == 'sp' ? 12000 : 15000, 18, ''], ['Kampas rem belakang', 20000, 24, ''], ['Minyak rem', 20000, 24, '']);
       if (k == 'sp' || k == 'tr' || k == 'rt') out.push(['Oli shock depan', k == 'tr' ? 15000 : 20000, 24, 'Fork']);
-      out.push(['Ban depan', k == 'sp' || k == 'tr' ? 20000 : 25000, 36, ''], ['Ban belakang', k == 'sp' || k == 'tr' ? 15000 : 20000, 36, ''], ['Aki', 24000, 24, '']);
+      out.push(['Ban depan', k == 'sp' || k == 'tr' ? 20000 : 25000, 36, ''], ['Ban belakang', k == 'sp' || k == 'tr' ? 15000 : 20000, 36, '']);
+      out.push(['Aki', 24000, 24, '']);
       if (cair) out.push(['Air radiator', 24000, 24, 'Pendingin cairan']);
     }
     if (i.kunci == 'keyless') out.push(['Baterai remote keyless', 0, 24, 'CR2032 · usia 12–24 bln']);
@@ -786,6 +803,7 @@ var save = function() {
   sync('Menyimpan ke Supabase...');
   clearTimeout(_t);
   _t = setTimeout(push, 300);
+  checkAllNotifications();
 };
 
 async function push() {
@@ -833,6 +851,7 @@ async function loadDataFromSheet(showToast) {
       draw();
       sync('Tersinkron dengan Supabase');
       if (showToast) toast('ok', 'Data diperbarui', 'Memuat data terbaru dari Supabase');
+      checkAllNotifications();
     } else {
       sync('Database baru, menyimpan data lokal...');
       push();
@@ -1076,19 +1095,36 @@ var ICONS = {
   his: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>'
 };
 
+function countUrgentItems() {
+  if (!S || !S.comps) return 0;
+  var cnt = 0;
+  S.comps.filter(isSet).forEach(function(c) {
+    var s = st(c);
+    if (s.k === 'er' || s.k === 'wa') cnt++;
+  });
+  var p = pj();
+  if ((p.k === 'er' || p.k === 'wa') && !p.paid) cnt++;
+  return cnt;
+}
+
 function nav() {
   var on = S && tab != 'home';
   var navEl = $('#nav');
   if (navEl) {
     navEl.style.display = on ? 'flex' : 'none';
     if (on) {
+      var uCount = countUrgentItems();
+      var badgeHtml = uCount > 0 ? '<span class="nav-badge">' + uCount + '</span>' : '';
+
       navEl.innerHTML = [
         ['motor', 'home', 'Ringkasan'],
-        ['dash', 'dash', 'Jadwal'],
+        ['dash', 'dash', 'Jadwal', badgeHtml],
         ['komp', 'komp', 'Komponen'],
         ['svc', 'svc', 'Servis'],
         ['his', 'his', 'Riwayat']
-      ].map(function(t) { return '<button class="' + (tab == t[0] ? 'on' : '') + '" data-nav="' + t[0] + '">' + ICONS[t[1]] + '<span>' + t[2] + '</span></button>'; }).join('');
+      ].map(function(t) { 
+        return '<button class="' + (tab == t[0] ? 'on' : '') + '" data-nav="' + t[0] + '">' + ICONS[t[1]] + (t[3] || '') + '<span>' + t[2] + '</span></button>'; 
+      }).join('');
     }
   }
 }
@@ -1667,6 +1703,7 @@ function draw() {
       vEl.innerHTML = '<div class="c alert-box"><b>Terjadi kesalahan tampilan:</b> ' + err.message + '<br><button class="p" onclick="tab=\'home\';S=null;draw();" style="margin-top:8px;">Kembali ke Beranda</button></div>';
     }
   }
+  updateNotifBtnState();
 }
 
 var uid = function() { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); };
@@ -1702,7 +1739,104 @@ function saveComponentDetails(compId) {
   toast('ok', 'Komponen Disimpan', 'Data ' + E(comp.name) + ' berhasil diperbarui.');
 }
 
+// ==========================================
+// FITUR PENGINGAT (WEB NOTIFICATION API)
+// ==========================================
+function updateNotifBtnState() {
+  var btn = $('#btnNotif');
+  if (!btn) return;
+  if (!("Notification" in window)) {
+    btn.style.display = 'none';
+    return;
+  }
+  if (Notification.permission === "granted") {
+    btn.classList.add('active');
+    btn.title = "Pengingat Notifikasi Aktif";
+  } else {
+    btn.classList.remove('active');
+    btn.title = "Aktifkan Pengingat Notifikasi";
+  }
+}
+
+function requestNotifPermission() {
+  if (!("Notification" in window)) {
+    alert("Browser Anda tidak mendukung Notifikasi Web.");
+    return;
+  }
+  if (Notification.permission === "granted") {
+    toast('ok', 'Pengingat Aktif', 'Notifikasi browser sudah aktif.');
+    checkAllNotifications();
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission().then(function(permission) {
+      if (permission === "granted") {
+        toast('ok', 'Notifikasi Diaktifkan', 'Anda akan menerima pengingat pajak & servis.');
+        updateNotifBtnState();
+        checkAllNotifications();
+      } else {
+        toast('er', 'Izin Ditolak', 'Notifikasi tidak diaktifkan.');
+      }
+    });
+  } else {
+    alert("Izin notifikasi diblokir di browser. Silakan aktifkan lewat Pengaturan Situs di browser Anda.");
+  }
+}
+
+function sendLocalNotif(title, options) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    try {
+      new Notification(title, options);
+    } catch(e){}
+  }
+}
+
+function checkAllNotifications() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  
+  var todayStr = today();
+  var lastChecked = localStorage.getItem('last_notif_check_date');
+  if (lastChecked === todayStr) return; // Hanya kirim notifikasi 1x sehari saat dibuka
+  
+  (R.vehicles || []).forEach(function(v) {
+    withV(v, function() {
+      // 1. Cek Pajak
+      var p = pj();
+      if (!p.paid && p.tgl) {
+        if (p.n <= 14 && p.n >= 0) {
+          sendLocalNotif("⚠️ Pengingat Pajak: " + (v.motor || 'Kendaraan'), {
+            body: "Pajak akan jatuh tempo dalam " + p.t + " (" + dt(p.tgl) + ").",
+            icon: "/manifest.json"
+          });
+        } else if (p.n < 0) {
+          sendLocalNotif("🚨 Pajak Terlewat: " + (v.motor || 'Kendaraan'), {
+            body: "Pajak sudah terlambat. Segera lakukan pembayaran.",
+            icon: "/manifest.json"
+          });
+        }
+      }
+
+      // 2. Cek Komponen
+      (v.comps || []).filter(isSet).forEach(function(c) {
+        var s = st(c);
+        if (s.k === 'er') {
+          sendLocalNotif("🔧 Servis Mendesak: " + c.name, {
+            body: "Part pada " + (v.motor || 'kendaraan') + " sudah melewati batas pemakaian (" + s.t + ").",
+            icon: "/manifest.json"
+          });
+        } else if (s.k === 'wa') {
+          sendLocalNotif("⚠️ Jadwal Servis: " + c.name, {
+            body: "Part pada " + (v.motor || 'kendaraan') + " mendekati waktu ganti (" + s.t + ").",
+            icon: "/manifest.json"
+          });
+        }
+      });
+    });
+  });
+
+  localStorage.setItem('last_notif_check_date', todayStr);
+}
+
 document.addEventListener('click', function(e) {
+  if (e.target.closest && e.target.closest('#btnNotif')) { requestNotifPermission(); return; }
   if (e.target.closest && e.target.closest('#logoBtn')) { loadDataFromSheet(true); return; }
   if (e.target.closest && e.target.closest('[data-drag]')) { e.preventDefault(); return; }
   
@@ -1866,7 +2000,7 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// Live formatting untuk input dengan kelas 'rp' (angka/rupiah)
+// Live formatting untuk input berkelas 'rp' (angka/rupiah)
 document.addEventListener('input', function(e) {
   var t = e.target;
   if (t && t.classList && t.classList.contains('rp')) {
@@ -2045,7 +2179,7 @@ window.addEventListener('focus', function() {
   if (!_busy) loadDataFromSheet(false);
 });
 document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible' & !_busy) {
+  if (document.visibilityState === 'visible' && !_busy) {
     loadDataFromSheet(false);
   }
 });
