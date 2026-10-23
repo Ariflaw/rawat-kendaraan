@@ -133,7 +133,6 @@ button.p { background: var(--primary); color: #fff; border: none; font-weight: 7
 details summary { cursor: pointer; font-weight: 700; font-size: 13px; min-height: 32px; display: flex; align-items: center; }
 details[open] summary { margin-bottom: 6px; }
 
-/* Styling Kartu SIM Tambahan */
 .sim-card { position: relative; border-left: 5px solid var(--primary); background: linear-gradient(135deg, var(--bg-card), var(--bg-subtle)); }
 .sim-card.er { border-left-color: var(--er-bg); }
 .sim-card.wa { border-left-color: var(--wa-bg); }
@@ -570,10 +569,25 @@ body.dragging { -webkit-user-select: none; user-select: none; }
 
 <nav id="nav" style="display:none;"></nav>
 
-<!-- SDK Supabase Client Resmi -->
+<!-- SDK Supabase Client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+// Helper Pengaman Pemanggilan Elemen DOM
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return document.querySelectorAll(sel); }
+function E(str) { 
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function dt(d) {
+  if (!d) return '—';
+  var p = String(d).split('-');
+  if (p.length < 3) return d;
+  var m = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  return parseInt(p[2], 10) + ' ' + (m[parseInt(p[1], 10) - 1] || p[1]) + ' ' + p[0];
+}
+
 // ==========================================
 // KREDENSIAL SUPABASE
 // ==========================================
@@ -586,7 +600,7 @@ try {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 } catch(e) {
-  console.warn("Supabase gagal dimuat, beralih ke mode lokal.");
+  console.warn("Supabase tidak tersedia, berjalan penuh di LocalStorage.");
 }
 
 var K = 'servisMotor_v1';
@@ -902,62 +916,61 @@ var save = function() {
   checkAllNotifications();
 };
 
-async function push() {
+function push() {
   if (!supabaseClient) { sync('Tersimpan di Lokal'); return; }
   if (_busy) { _again = true; return; }
   _busy = true;
 
-  try {
-    var res = await supabaseClient
-      .from('app_state')
-      .upsert({ id: 'default_user', data: R, updated_at: new Date().toISOString() });
-
-    _busy = false;
-    if (res.error) throw res.error;
-
-    if (_again) { _again = false; push(); }
-    else { 
-      sync('Tersinkron dengan Supabase'); 
-      toast('ok', 'Tersimpan', 'Data berhasil diperbarui di Supabase'); 
-    }
-  } catch(err) {
-    _busy = false;
-    sync('Gagal menyimpan');
-    toast('er', 'Gagal menyimpan', err.message || 'Periksa koneksi internet.');
-  }
+  supabaseClient
+    .from('app_state')
+    .upsert({ id: 'default_user', data: R, updated_at: new Date().toISOString() })
+    .then(function(res) {
+      _busy = false;
+      if (res.error) throw res.error;
+      if (_again) { _again = false; push(); }
+      else { 
+        sync('Tersinkron dengan Supabase'); 
+        toast('ok', 'Tersimpan', 'Data berhasil diperbarui di Supabase'); 
+      }
+    })
+    .catch(function(err) {
+      _busy = false;
+      sync('Gagal menyimpan');
+      toast('er', 'Gagal menyimpan', (err && err.message) || 'Periksa koneksi internet.');
+    });
 }
 
-async function loadDataFromSheet(showToast) {
-  if (!supabaseClient) return;
+function loadDataFromSheet(showToast) {
+  if (!supabaseClient) { sync('Mode Offline (Lokal)'); return; }
   sync('Memperbarui data...');
-  try {
-    var res = await supabaseClient
-      .from('app_state')
-      .select('data')
-      .eq('id', 'default_user')
-      .single();
-
-    if (res.error && res.error.code !== 'PGRST116') throw res.error;
-
-    if (res.data && res.data.data) {
-      var cid = S && S.id;
-      R = res.data.data; norm();
-      try { localStorage.setItem(K, JSON.stringify(R)); } catch(e){}
-      if (cid) {
-        S = R.vehicles.find(function(v) { return v.id == cid; }) || null;
+  
+  supabaseClient
+    .from('app_state')
+    .select('data')
+    .eq('id', 'default_user')
+    .single()
+    .then(function(res) {
+      if (res.error && res.error.code !== 'PGRST116') throw res.error;
+      if (res.data && res.data.data) {
+        var cid = S && S.id;
+        R = res.data.data; norm();
+        try { localStorage.setItem(K, JSON.stringify(R)); } catch(e){}
+        if (cid) {
+          S = R.vehicles.find(function(v) { return v.id == cid; }) || null;
+        }
+        draw();
+        sync('Tersinkron dengan Supabase');
+        if (showToast) toast('ok', 'Data diperbarui', 'Memuat data terbaru dari Supabase');
+        checkAllNotifications();
+      } else {
+        sync('Database baru, menyimpan data lokal...');
+        push();
       }
-      draw();
-      sync('Tersinkron dengan Supabase');
-      if (showToast) toast('ok', 'Data diperbarui', 'Memuat data terbaru dari Supabase');
-      checkAllNotifications();
-    } else {
-      sync('Database baru, menyimpan data lokal...');
-      push();
-    }
-  } catch(e) {
-    sync('Mode Offline');
-    if (showToast) toast('er', 'Gagal memuat', 'Menggunakan data lokal.');
-  }
+    })
+    .catch(function(e) {
+      sync('Mode Offline');
+      if (showToast) toast('er', 'Gagal memuat', 'Menggunakan data lokal.');
+    });
 }
 
 var pn = function(v) { return +String(v == null ? '' : v).replace(/\D/g, '') || 0; };
@@ -1829,9 +1842,6 @@ function home() {
   '<div class="r"><button class="p" data-addv="motor" style="flex:1;">+ Tambah Motor</button><button class="p" data-addv="mobil" style="flex:1;">+ Tambah Mobil</button></div>';
 }
 
-// ==========================================
-// RENDER HALAMAN SIM
-// ==========================================
 function renderSIMs() {
   var container = $('#simListContainer');
   if (!container) return;
@@ -1904,7 +1914,7 @@ function draw() {
       var renderFn = fnMap[tab] || home;
       vEl.innerHTML = (S && tab != 'home' && !(tab == 'motor' && !editM) ? bar() : '') + renderFn();
     } catch(err) {
-      vEl.innerHTML = '<div class="c alert-box"><b>Terjadi kesalahan tampilan:</b> ' + err.message + '<br><button class="p" onclick="tab=\'home\';S=null;draw();" style="margin-top:8px;">Kembali ke Beranda</button></div>';
+      vEl.innerHTML = '<div class="c alert-box"><b>Terjadi kesalahan tampilan:</b> ' + E(err.message) + '<br><button class="p" onclick="tab=\'home\';S=null;draw();" style="margin-top:8px;">Kembali ke Beranda</button></div>';
     }
   }
 }
@@ -1986,7 +1996,7 @@ function handleNotifActionBtn() {
   if (!("Notification" in window)) return;
   var perm = Notification.permission;
   if (perm === "granted") {
-    alert("Untuk menonaktifkan notifikasi, silakan ubah izin situs (klik ikon gembok/pengaturan di samping alamat URL browser Anda) lalu ubah izin Notifikasi menjadi 'Blokir' atau 'Tanya'.");
+    alert("Untuk menonaktifkan notifikasi, silakan ubah izin situs di pengaturan browser Anda.");
   } else if (perm === "denied") {
     alert("Izin notifikasi diblokir. Silakan buka Pengaturan Browser > Setelan Situs > Notifikasi untuk mengizinkannya kembali.");
   } else {
@@ -2281,7 +2291,6 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// Form Submit SIM
 document.addEventListener('submit', function(e) {
   if (e.target && e.target.id === 'formSIM') {
     e.preventDefault();
@@ -2478,21 +2487,17 @@ $('#btnTheme').addEventListener('click', function() {
 window.addEventListener('focus', function() {
   if (!_busy) loadDataFromSheet(false);
 });
-document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible' && !_busy) {
-    loadDataFromSheet(false);
-  }
-});
 
-// Pastikan DOM siap sepenuhnya sebelum render awal
-document.addEventListener('DOMContentLoaded', function() {
+// Inisialisasi Langsung Tanpa Menunggu Supabase
+function initApp() {
   draw();
   loadDataFromSheet(false);
-});
-// Fallback cadangan jika DOMContentLoaded sudah terlewat
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  draw();
-  loadDataFromSheet(false);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
 }
 </script>
 </body>
