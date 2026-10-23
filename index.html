@@ -133,42 +133,105 @@ button.p { background: var(--primary); color: #fff; border: none; font-weight: 7
 details summary { cursor: pointer; font-weight: 700; font-size: 13px; min-height: 32px; display: flex; align-items: center; }
 details[open] summary { margin-bottom: 6px; }
 
-/* Desain Kartu SIM Ala Fisik Nasional */
-.sim-card { 
-  position: relative; 
-  background: linear-gradient(135deg, var(--bg-card), var(--bg-subtle)); 
-  border-radius: 14px;
-  border: 1.5px solid var(--border-color);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.15s ease;
-}
-.sim-card.ok { border-color: var(--ok-bg); }
-.sim-card.wa { border-color: var(--wa-bg); }
-.sim-card.er { border-color: var(--er-bg); animation: pulse-red 2s infinite; }
+/* ===== SIM: tampilan kartu baru ===== */
+.sim-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.sim-head h3 { margin:0; font-size:18px; font-weight:800; letter-spacing:-.3px; }
+.sim-head p { margin:2px 0 0; font-size:11.5px; color:var(--text-muted); font-weight:500; }
+.sim-add { display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border-radius:12px; font-size:12.5px; box-shadow:0 4px 12px rgba(2,132,199,.28); }
+.sim-add svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.6; stroke-linecap:round; }
 
-.sim-card-header {
-  background: #dc2626;
-  color: #fff;
-  padding: 8px 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.sim-card-body {
-  padding: 12px;
-}
-.sim-type-badge { 
-  font-size: 18px; 
-  font-weight: 900; 
-  letter-spacing: 1px;
-  color: var(--text-main);
-  background: var(--bg-subtle);
-  padding: 2px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-}
-.sim-number { font-family: monospace; font-size: 13px; font-weight: 700; color: var(--text-muted); margin-top: 4px; }
+.sim-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+.sim-stat { background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 8px; text-align:center; box-shadow:var(--shadow-sm); }
+.sim-stat b { display:block; font-size:22px; font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums; }
+.sim-stat span { display:block; margin-top:3px; font-size:10.5px; font-weight:600; color:var(--text-muted); }
+.sim-stat.ok b { color:var(--ok-bg); } .sim-stat.wa b { color:var(--wa-bg); } .sim-stat.er b { color:var(--er-bg); }
+
+.sim-wrap { background:var(--bg-card); border:1px solid var(--border-color); border-radius:20px; overflow:hidden; margin-bottom:14px; box-shadow:var(--shadow-md); }
+.sim-wrap.er { border-color:var(--er-bg); }
+.sim-wrap.wa { border-color:var(--wa-bg); }
+
+/* kartu fisik */
+.sim-card { --c1:#0369a1; --c2:#1e3a8a; --glow:rgba(56,189,248,.45);
+  position:relative; overflow:hidden; color:#fff; padding:16px 16px 14px; min-height:178px;
+  display:flex; flex-direction:column; justify-content:space-between; gap:14px;
+  background:linear-gradient(135deg,var(--c1) 0%,var(--c2) 100%); }
+.sim-card.wa { --c1:#d97706; --c2:#92400e; --glow:rgba(253,224,71,.4); }
+.sim-card.er { --c1:#dc2626; --c2:#7f1d1d; --glow:rgba(252,165,165,.45); }
+.sim-card::before { content:""; position:absolute; width:240px; height:240px; right:-70px; top:-90px; border-radius:50%;
+  background:radial-gradient(circle,var(--glow),transparent 68%); pointer-events:none; }
+.sim-card::after { content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.14) 48%,transparent 60%); }
+.sim-wm { position:absolute; right:-14px; bottom:-30px; font-size:150px; font-weight:800; line-height:1; letter-spacing:-6px; color:rgba(255,255,255,.09); pointer-events:none; user-select:none; }
+.sim-card > * { position:relative; z-index:1; }
+
+.sim-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.sim-title { font-size:11px; font-weight:800; letter-spacing:1.6px; line-height:1.3; text-transform:uppercase; }
+.sim-title small { display:block; font-size:9px; font-weight:600; letter-spacing:1.2px; opacity:.72; margin-top:2px; }
+.sim-class { flex:none; min-width:44px; height:44px; padding:0 10px; display:grid; place-items:center; border-radius:12px;
+  font-size:20px; font-weight:800; letter-spacing:.5px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
+  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+
+.sim-mid { display:flex; align-items:center; gap:12px; }
+.sim-chip { flex:none; width:38px; height:29px; border-radius:6px; position:relative;
+  background:linear-gradient(135deg,#fde68a,#f59e0b 55%,#fcd34d); box-shadow:inset 0 0 0 1px rgba(120,53,15,.35); }
+.sim-chip::before,.sim-chip::after { content:""; position:absolute; left:0; right:0; height:1px; background:rgba(120,53,15,.4); }
+.sim-chip::before { top:9px; } .sim-chip::after { bottom:9px; }
+.sim-num { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:17px; font-weight:700; letter-spacing:1.5px; text-shadow:0 1px 2px rgba(0,0,0,.25); word-break:break-all; }
+
+.sim-bot { display:flex; justify-content:space-between; align-items:flex-end; gap:12px; }
+.sim-lbl { font-size:9px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; opacity:.7; }
+.sim-val { font-size:14px; font-weight:800; margin-top:2px; text-transform:uppercase; letter-spacing:.2px; overflow-wrap:anywhere; }
+.sim-bot > div:last-child { text-align:right; flex:none; }
+.sim-bot .sim-val.d { font-variant-numeric:tabular-nums; text-transform:none; }
+
+/* panel status */
+.sim-panel { padding:12px 14px 14px; }
+.sim-status { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px; }
+.sim-pill { display:inline-flex; align-items:center; gap:6px; padding:5px 11px 5px 9px; border-radius:99px; font-size:11.5px; font-weight:800; }
+.sim-pill i { width:8px; height:8px; border-radius:50%; background:currentColor; flex:none; }
+.sim-pill.ok { background:rgba(22,163,74,.14); color:var(--ok-bg); }
+.sim-pill.wa { background:rgba(217,119,6,.15); color:var(--wa-bg); }
+.sim-pill.er { background:rgba(220,38,38,.14); color:var(--er-bg); }
+.sim-pill.er i { animation:pulse-red 2s infinite; }
+.sim-left { font-size:12px; font-weight:700; color:var(--text-muted); text-align:right; }
+.sim-prog { height:8px; border-radius:99px; background:var(--bg-subtle); overflow:hidden; }
+.sim-prog > div { height:100%; border-radius:99px; transition:width .6s ease; }
+.sim-prog.ok > div { background:linear-gradient(90deg,#22c55e,var(--ok-bg)); }
+.sim-prog.wa > div { background:linear-gradient(90deg,#fbbf24,var(--wa-bg)); }
+.sim-prog.er > div { background:linear-gradient(90deg,#f87171,var(--er-bg)); }
+.sim-prog-cap { display:flex; justify-content:space-between; margin-top:5px; font-size:10px; color:var(--text-muted); font-weight:600; }
+.sim-actions { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; margin-top:12px; }
+.sim-actions .btn-outline { min-height:40px; border-radius:11px; font-size:12px; }
+.sim-actions .btn-outline svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.sim-actions .del { color:var(--er-bg); border-color:var(--er-bg); padding:6px 12px; }
+.sim-hint { display:flex; gap:8px; align-items:flex-start; font-size:11.5px; line-height:1.5; color:var(--text-muted); background:var(--bg-subtle); border-radius:12px; padding:10px 12px; margin-top:2px; }
+
+.sim-empty { text-align:center; padding:30px 20px; border:2px dashed var(--border-color); border-radius:20px; background:var(--bg-card); }
+.sim-empty .ph { width:120px; height:76px; margin:0 auto 14px; border-radius:12px; background:linear-gradient(135deg,var(--primary),#1e3a8a); opacity:.9; position:relative; box-shadow:var(--shadow-md); transform:rotate(-4deg); }
+.sim-empty .ph::before { content:""; position:absolute; left:12px; top:14px; width:24px; height:18px; border-radius:4px; background:linear-gradient(135deg,#fde68a,#f59e0b); }
+.sim-empty .ph::after { content:""; position:absolute; left:12px; right:30px; bottom:14px; height:6px; border-radius:3px; background:rgba(255,255,255,.55); box-shadow:0 -12px 0 rgba(255,255,255,.3); }
+.sim-empty b { display:block; font-size:15px; margin-bottom:4px; }
+.sim-empty p { margin:0 0 14px; font-size:12px; color:var(--text-muted); line-height:1.5; }
+
+/* modal SIM */
+#modalAddSIM .modal-card { max-width:420px; max-height:calc(100dvh - 32px); overflow-y:auto; padding:18px; }
+.sim-form { display:flex; flex-direction:column; gap:14px; }
+.sim-field > span { display:block; font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:6px; letter-spacing:.2px; }
+.sim-field input { width:100%; min-height:44px; border-radius:12px; font-size:14px; }
+.sim-types { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+.sim-type { display:flex; flex-direction:column; align-items:center; gap:1px; padding:8px 2px; min-height:0; border-radius:12px; border:1.5px solid var(--border-color); background:var(--bg-card); cursor:pointer; line-height:1.15; }
+.sim-type b { font-size:15px; font-weight:800; }
+.sim-type small { font-size:9px; font-weight:600; color:var(--text-muted); }
+.sim-type.on { border-color:var(--primary); background:var(--primary-light); box-shadow:0 0 0 2px var(--primary-light); }
+.sim-type.on b { color:var(--primary); }
+.sim-type-desc { margin-top:6px; font-size:11.5px; color:var(--text-muted); font-weight:500; min-height:16px; }
+.sim-quick { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+.sim-quick button { min-height:30px; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:700; color:var(--primary); background:var(--primary-light); border:none; }
+.sim-preview { border-radius:16px; overflow:hidden; box-shadow:var(--shadow-md); }
+.sim-preview .sim-card { min-height:150px; padding:14px; gap:10px; }
+.sim-preview .sim-num { font-size:15px; }
+.sim-submit { min-height:48px; border-radius:14px; font-size:14px; width:100%; box-shadow:0 4px 12px rgba(2,132,199,.28); }
+@media (max-width:380px) { .sim-types { grid-template-columns:repeat(3,1fr); } .sim-num { font-size:15px; letter-spacing:1px; } }
 
 nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
@@ -562,35 +625,53 @@ body.dragging { -webkit-user-select: none; user-select: none; }
   <div class="modal-card">
     <div class="modal-header">
       <h3 class="modal-title" id="simModalTitle">🪪 Tambah SIM Baru</h3>
-      <button class="modal-close" id="closeSIMModal">✕</button>
+      <button type="button" class="modal-close" id="closeSIMModal" aria-label="Tutup">✕</button>
     </div>
-    <form id="formSIM" style="display: flex; flex-direction: column; gap: 10px;">
+    <form id="formSIM" class="sim-form">
       <input type="hidden" id="simEditIndex" value="-1">
-      <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">
-        Jenis SIM
-        <select id="simType" required style="width: 100%; margin-top: 4px;">
+
+      <div class="sim-preview" id="simPreview"></div>
+
+      <div class="sim-field">
+        <span>Golongan SIM</span>
+        <select id="simType" required style="display:none;">
           <option value="SIM C">SIM C (Sepeda Motor)</option>
           <option value="SIM C1">SIM C1 (Motor 250cc-500cc)</option>
-          <option value="SIM C2">SIM C2 (Motor >500cc)</option>
+          <option value="SIM C2">SIM C2 (Motor &gt;500cc)</option>
           <option value="SIM A">SIM A (Mobil / Penumpang)</option>
           <option value="SIM B1">SIM B1 (Bus / Truk Sedang)</option>
           <option value="SIM B2">SIM B2 (Truk Gandeng / Alat Berat)</option>
           <option value="SIM D">SIM D (Disabilitas)</option>
         </select>
+        <div class="sim-types" id="simTypes">
+          <button type="button" class="sim-type" data-simtype="SIM C"><b>C</b><small>Motor</small></button>
+          <button type="button" class="sim-type" data-simtype="SIM C1"><b>C1</b><small>Motor 250+</small></button>
+          <button type="button" class="sim-type" data-simtype="SIM C2"><b>C2</b><small>Motor 500+</small></button>
+          <button type="button" class="sim-type" data-simtype="SIM A"><b>A</b><small>Mobil</small></button>
+          <button type="button" class="sim-type" data-simtype="SIM B1"><b>B1</b><small>Bus/Truk</small></button>
+          <button type="button" class="sim-type" data-simtype="SIM B2"><b>B2</b><small>Gandeng</small></button>
+          <button type="button" class="sim-type" data-simtype="SIM D"><b>D</b><small>Disabilitas</small></button>
+        </div>
+        <div class="sim-type-desc" id="simTypeDesc"></div>
+      </div>
+
+      <label class="sim-field">
+        <span>Nomor SIM</span>
+        <input type="text" id="simNum" inputmode="numeric" autocomplete="off" placeholder="Contoh: 1234-5678-9012" required>
       </label>
-      <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">
-        Nomor SIM
-        <input type="text" id="simNum" placeholder="Contoh: 1234-5678-9012" required style="width: 100%; margin-top: 4px;">
+      <label class="sim-field">
+        <span>Nama Pemilik (sesuai SIM)</span>
+        <input type="text" id="simOwner" autocomplete="off" placeholder="Nama lengkap pemilik" required>
       </label>
-      <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">
-        Nama Pemilik (Sesuai SIM)
-        <input type="text" id="simOwner" placeholder="Nama lengkap pemilik" required style="width: 100%; margin-top: 4px;">
-      </label>
-      <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">
-        Tanggal Habis Berlaku SIM
-        <input type="date" id="simExpDate" required style="width: 100%; margin-top: 4px;">
-      </label>
-      <button type="submit" class="p" id="simSubmitBtn" style="margin-top: 10px; width: 100%;">Simpan Data SIM</button>
+      <div class="sim-field">
+        <span>Tanggal Habis Berlaku</span>
+        <input type="date" id="simExpDate" required>
+        <div class="sim-quick">
+          <button type="button" data-simplus="5">+5 thn dari hari ini</button>
+          <button type="button" data-simplus="1">+1 thn</button>
+        </div>
+      </div>
+      <button type="submit" class="p sim-submit" id="simSubmitBtn">Simpan Data SIM</button>
     </form>
   </div>
 </div>
@@ -1821,78 +1902,109 @@ function home() {
   '<div class="r"><button class="p" data-addv="motor" style="flex:1;">+ Tambah Motor</button><button class="p" data-addv="mobil" style="flex:1;">+ Tambah Mobil</button></div>';
 }
 
+var SIM_INFO = {
+  'SIM A':  'Mobil penumpang & barang (maks. 3.500 kg)',
+  'SIM B1': 'Bus & truk sedang (di atas 3.500 kg)',
+  'SIM B2': 'Kendaraan gandeng / alat berat',
+  'SIM C':  'Sepeda motor (s.d. 250 cc)',
+  'SIM C1': 'Sepeda motor 250 cc – 500 cc',
+  'SIM C2': 'Sepeda motor di atas 500 cc',
+  'SIM D':  'Pengemudi penyandang disabilitas'
+};
+
+function simStatus(expStr) {
+  var exp = new Date(expStr + 'T00:00:00');
+  var now = new Date(); now.setHours(0, 0, 0, 0);
+  var diff = Math.round((exp - now) / 86400000);
+  var cls = 'ok', label = 'Aktif', left = '';
+  function span(d) {
+    d = Math.abs(d);
+    var y = Math.floor(d / 365), m = Math.floor((d % 365) / 30), dd = d - y * 365 - m * 30;
+    if (y > 0) return y + ' thn' + (m ? ' ' + m + ' bln' : '');
+    if (m > 0) return m + ' bln' + (dd ? ' ' + dd + ' hari' : '');
+    return d + ' hari';
+  }
+  if (isNaN(diff)) { return { diff: 0, cls: 'nu', label: 'Tanggal belum valid', left: '—', pct: 0 }; }
+  if (diff < 0) { cls = 'er'; label = 'Kedaluwarsa'; left = span(diff) + ' lalu'; }
+  else if (diff <= 60) { cls = 'er'; label = 'Kritis — segera perpanjang'; left = diff === 0 ? 'Berakhir hari ini' : diff + ' hari lagi'; }
+  else if (diff <= 365) { cls = 'wa'; label = 'Siap diperpanjang'; left = span(diff) + ' lagi'; }
+  else { left = span(diff) + ' lagi'; }
+  var pct = Math.max(0, Math.min(100, (diff / (365 * 5)) * 100));
+  return { diff: diff, cls: cls, label: label, left: left, pct: pct };
+}
+
+function simCardHTML(type, num, owner, expStr, cls) {
+  var code = String(type || 'SIM').replace(/^SIM\s*/i, '') || '—';
+  return '<div class="sim-card ' + cls + '">' +
+    '<div class="sim-wm">' + E(code) + '</div>' +
+    '<div class="sim-top">' +
+      '<div class="sim-title">Surat Izin Mengemudi<small>Driving License · Indonesia</small></div>' +
+      '<div class="sim-class">' + E(code) + '</div>' +
+    '</div>' +
+    '<div class="sim-mid"><div class="sim-chip"></div><div class="sim-num">' + (E(num) || '0000 0000 0000') + '</div></div>' +
+    '<div class="sim-bot">' +
+      '<div><div class="sim-lbl">Pemegang</div><div class="sim-val">' + (E(owner) || 'Nama pemilik') + '</div></div>' +
+      '<div><div class="sim-lbl">Berlaku s/d</div><div class="sim-val d">' + (expStr ? dt(expStr) : '— — —') + '</div></div>' +
+    '</div>' +
+  '</div>';
+}
+
+var SIM_ICON = {
+  edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>',
+  copy: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
+  del:  '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>',
+  plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+};
+
 function renderSIMs() {
   var container = $('#simListContainer');
   if (!container) return;
   var sims = R.sims || [];
 
   if (sims.length === 0) {
-    container.innerHTML = '<div class="c" style="text-align:center; color:var(--text-muted); padding:24px;">Belum ada data SIM yang disimpan.<br>Silakan ketuk tombol "+ Tambah SIM" di atas.</div>';
+    container.innerHTML = '<div class="sim-empty"><div class="ph"></div>' +
+      '<b>Belum ada SIM tersimpan</b>' +
+      '<p>Simpan SIM Anda di sini dan dapatkan pengingat otomatis sebelum masa berlakunya habis.</p>' +
+      '<button class="p sim-add" id="openSIMModalBtn2" style="margin:auto;">' + SIM_ICON.plus + ' Tambah SIM Pertama</button></div>';
     return;
   }
 
-  var todayDate = new Date();
-  container.innerHTML = sims.map(function(sim, idx) {
-    var expDate = new Date(sim.expDate);
-    var diffTime = expDate - todayDate;
-    var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    // Masa aktif SIM 5 tahun. Jika sudah 1 tahun terakhir (<= 365 hari) berubah warna,
-    // dan jika 2 bulan terakhir (<= 60 hari) masuk masa kritis dengan animasi mencolok (er dengan pulse-red).
-    var badgeClass = "ok";
-    var badgeText = "✓ Aman";
-    if (diffDays < 0) {
-      badgeClass = "er";
-      badgeText = "❌ Kedaluwarsa (" + Math.abs(diffDays) + " hari lalu)";
-    } else if (diffDays <= 60) {
-      badgeClass = "er"; // Masa kritis 2 bulan terakhir dengan animasi mencolok
-      badgeText = "🚨 Kritis: " + diffDays + " Hari Lagi";
-    } else if (diffDays <= 365) {
-      badgeClass = "wa"; // 1 tahun terakhir berubah warna
-      badgeText = "⚠️ Siap Diperbarui (" + Math.round(diffDays/30) + " bln)";
-    } else {
-      var diffYears = (diffDays / 365).toFixed(1);
-      badgeText = "✓ Aman (" + diffYears + " Thn)";
-    }
+  var items = sims.map(function(sim, idx) { return { sim: sim, idx: idx, st: simStatus(sim.expDate) }; });
+  var cOk = 0, cWa = 0, cEr = 0;
+  items.forEach(function(it) { if (it.st.cls === 'er') cEr++; else if (it.st.cls === 'wa') cWa++; else cOk++; });
+  items.sort(function(a, b) { return a.st.diff - b.st.diff; }); // paling mendesak di atas
 
-    return '<div class="sim-card ' + badgeClass + '" style="margin-bottom: 12px;">' +
-      '<div class="sim-card-header">' +
-        '<div style="font-weight: 800; font-size: 13px; letter-spacing: 0.5px;">SURAT IZIN MENGEMUDI</div>' +
-        '<span class="b ' + badgeClass + '">' + badgeText + '</span>' +
-      '</div>' +
-      '<div class="sim-card-body">' +
-        '<div style="display: flex; justify-content: space-between; align-items: center;">' +
-          '<div>' +
-            '<div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">JENIS SIM</div>' +
-            '<div class="sim-type-badge" style="display:inline-block; margin-top:2px;">' + E(sim.type) + '</div>' +
-          '</div>' +
-          '<div style="text-align: right;">' +
-            '<div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">BERLAKU HINGGA</div>' +
-            '<div style="font-size: 15px; font-weight: 900; color: var(--text-main); margin-top: 2px;">' + dt(sim.expDate) + '</div>' +
-          '</div>' +
+  var stats = '<div class="sim-stats">' +
+    '<div class="sim-stat ok"><b>' + cOk + '</b><span>Aktif</span></div>' +
+    '<div class="sim-stat wa"><b>' + cWa + '</b><span>Perlu perpanjang</span></div>' +
+    '<div class="sim-stat er"><b>' + cEr + '</b><span>Kritis / habis</span></div></div>';
+
+  var cards = items.map(function(it) {
+    var sim = it.sim, st = it.st, idx = it.idx;
+    return '<div class="sim-wrap ' + st.cls + '">' +
+      simCardHTML(sim.type, sim.num, sim.owner, sim.expDate, st.cls) +
+      '<div class="sim-panel">' +
+        '<div class="sim-status"><span class="sim-pill ' + st.cls + '"><i></i>' + E(st.label) + '</span>' +
+        '<span class="sim-left">' + E(st.left) + '</span></div>' +
+        '<div class="sim-prog ' + st.cls + '"><div style="width:' + st.pct.toFixed(1) + '%"></div></div>' +
+        '<div class="sim-prog-cap"><span>Sisa masa berlaku</span><span>dari 5 tahun</span></div>' +
+        '<div class="sim-actions">' +
+          '<button class="btn-outline" data-copysim="' + idx + '">' + SIM_ICON.copy + ' Salin Nomor</button>' +
+          '<button class="btn-outline" data-editsim="' + idx + '">' + SIM_ICON.edit + ' Edit</button>' +
+          '<button class="btn-outline del" data-delsim="' + idx + '" aria-label="Hapus SIM">' + SIM_ICON.del + '</button>' +
         '</div>' +
-        '<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; align-items: center;">' +
-          '<div>' +
-            '<div style="font-size: 10px; color: var(--text-muted);">NOMOR SIM:</div>' +
-            '<div class="sim-number">' + E(sim.num) + '</div>' +
-            '<div style="font-size: 12px; font-weight: 700; margin-top:2px;">' + E(sim.owner) + '</div>' +
-          '</div>' +
-          '<div style="display: flex; gap: 6px;">' +
-            '<button class="btn-outline" style="font-size:11px; padding:4px 10px;" data-editsim="' + idx + '">✏️ Edit</button>' +
-            '<button class="btn-outline" style="font-size:11px; padding:4px 10px; color:var(--er-bg); border-color:var(--er-bg);" data-delsim="' + idx + '">Hapus</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
+      '</div></div>';
   }).join('');
+
+  container.innerHTML = stats + cards +
+    '<div class="sim-hint"><span>💡</span><span>Pengingat berubah <b>kuning</b> saat sisa masa berlaku &le; 1 tahun dan <b>merah</b> saat &le; 60 hari. Perpanjang SIM paling lambat sebelum tanggal berakhir.</span></div>';
 }
 
 function simListView() {
-  return '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">' +
-    '<h3 style="margin: 0; font-size: 16px;">🪪 SIM & Dokumen Driver</h3>' +
-    '<button class="p" id="openSIMModalBtn" style="padding: 6px 12px; font-size: 12px;">+ Tambah SIM</button>' +
-  '</div>' +
-  '<div id="simListContainer"></div>';
+  var n = (R.sims || []).length;
+  return '<div class="sim-head"><div><h3>SIM Saya</h3><p>' + (n ? n + ' dokumen tersimpan' : 'Dokumen pengemudi Anda') + '</p></div>' +
+    '<button class="p sim-add" id="openSIMModalBtn">' + SIM_ICON.plus + ' Tambah</button></div>' +
+    '<div id="simListContainer"></div>';
 }
 
 function draw() {
@@ -2525,6 +2637,55 @@ if (document.readyState === 'loading') {
 } else {
   initApp();
 }
+
+/* ===== SIM: interaksi tambahan ===== */
+function refreshSimPreview() {
+  var pv = $('#simPreview'); if (!pv) return;
+  var type = $('#simType').value, exp = $('#simExpDate').value;
+  var cls = exp ? simStatus(exp).cls : 'ok';
+  pv.innerHTML = simCardHTML(type, $('#simNum').value, $('#simOwner').value, exp, cls === 'nu' ? 'ok' : cls);
+  $$('#simTypes .sim-type').forEach(function(b) { b.classList.toggle('on', b.dataset.simtype === type); });
+  var d = $('#simTypeDesc'); if (d) d.textContent = SIM_INFO[type] || '';
+}
+document.addEventListener('click', function(e) {
+  var t = e.target.closest ? e.target.closest('[data-simtype]') : null;
+  if (t) { $('#simType').value = t.dataset.simtype; refreshSimPreview(); return; }
+
+  var plus = e.target.closest ? e.target.closest('[data-simplus]') : null;
+  if (plus) {
+    var d = new Date(); d.setFullYear(d.getFullYear() + parseInt(plus.dataset.simplus, 10));
+    var iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    $('#simExpDate').value = iso; refreshSimPreview(); return;
+  }
+
+  var cp = e.target.closest ? e.target.closest('[data-copysim]') : null;
+  if (cp) {
+    var s = (R.sims || [])[parseInt(cp.dataset.copysim, 10)];
+    if (s && navigator.clipboard) {
+      navigator.clipboard.writeText(String(s.num)).then(function() { toast('ok', 'Nomor disalin', s.num); }, function() { toast('er', 'Gagal menyalin', 'Izin clipboard ditolak.'); });
+    }
+    return;
+  }
+
+  if (e.target.closest && e.target.closest('#openSIMModalBtn2')) {
+    var b = $('#openSIMModalBtn'); if (b) b.click();
+  }
+});
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.closest && e.target.closest('#formSIM')) refreshSimPreview();
+});
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.closest && e.target.closest('#formSIM')) refreshSimPreview();
+});
+document.addEventListener('reset', function(e) {
+  if (e.target && e.target.id === 'formSIM') setTimeout(refreshSimPreview, 0);
+});
+(function() {
+  var m = $('#modalAddSIM');
+  if (m && window.MutationObserver) {
+    new MutationObserver(function() { if (m.classList.contains('show')) refreshSimPreview(); }).observe(m, { attributes: true, attributeFilter: ['class'] });
+  }
+})();
 </script>
 </body>
 </html>
