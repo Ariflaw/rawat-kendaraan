@@ -1521,11 +1521,16 @@ function his() {
   (S.hist||[]).concat(S.comps||[]).forEach(function(x) { if (x.brand && BRL.indexOf(x.brand) === -1) BRL.push(x.brand); });
   var dl = editIds ? getShopListHTML() + '<datalist id="cl">' + (S.comps||[]).map(function(c) { return '<option value="' + E(c.name) + '">'; }).join('') + '</datalist><datalist id="brl">' + BRL.map(function(b) { return '<option value="' + E(b) + '">'; }).join('') + '</datalist>' : '';
 
-  var toolbar = (S.hist || []).length ? '<div class="c htool">' +
-    '<div class="seg txt wide"><button data-hv="list" class="' + (hisView == 'list' ? 'on' : '') + '">Riwayat</button><button data-hv="stat" class="' + (hisView == 'stat' ? 'on' : '') + '">Statistik</button></div>' +
-    '<div class="chips"><button class="chip ' + (hisYear == 'all' ? 'on' : '') + '" data-hy="all">Semua</button>' + years.map(function(y) { return '<button class="chip ' + (hisYear == y ? 'on' : '') + '" data-hy="' + y + '">' + y + '</button>'; }).join('') + '</div>' +
-    (hisView == 'list' ? '<div class="row sortrow"><span class="mu">Urutkan</span><div class="seg txt"><button data-hs="new" class="' + (hisSort == 'new' ? 'on' : '') + '">Terbaru</button><button data-hs="old" class="' + (hisSort == 'old' ? 'on' : '') + '">Terlama</button><button data-hs="price" class="' + (hisSort == 'price' ? 'on' : '') + '">Termahal</button></div></div>' : '') +
-  '</div>' : '';
+  var toolbar = '<div class="c htool">' +
+    '<div class="seg txt wide" style="margin-bottom:8px;"><button data-hv="list" class="' + (hisView == 'list' ? 'on' : '') + '">Riwayat</button><button data-hv="stat" class="' + (hisView == 'stat' ? 'on' : '') + '">Statistik</button></div>' +
+    '<div style="display:flex; gap:6px; margin-bottom:8px;">' +
+      '<button class="btn-outline" id="exportBtn" style="flex:1; justify-content:center;">📤 Export JSON</button>' +
+      '<button class="btn-outline" id="importBtn" style="flex:1; justify-content:center;">📥 Import JSON</button>' +
+      '<input type="file" id="importFile" accept=".json" style="display:none">' +
+    '</div>' +
+    ((S.hist || []).length ? '<div class="chips"><button class="chip ' + (hisYear == 'all' ? 'on' : '') + '" data-hy="all">Semua</button>' + years.map(function(y) { return '<button class="chip ' + (hisYear == y ? 'on' : '') + '" data-hy="' + y + '">' + y + '</button>'; }).join('') + '</div>' : '') +
+    (hisView == 'list' && (S.hist || []).length ? '<div class="row sortrow"><span class="mu">Urutkan</span><div class="seg txt"><button data-hs="new" class="' + (hisSort == 'new' ? 'on' : '') + '">Terbaru</button><button data-hs="old" class="' + (hisSort == 'old' ? 'on' : '') + '">Terlama</button><button data-hs="price" class="' + (hisSort == 'price' ? 'on' : '') + '">Termahal</button></div></div>' : '') +
+  '</div>';
   if (hisView == 'stat') return dl + toolbar + hisStat(H, years);
 
   var showYH = hisYear == 'all' && hisSort != 'price' && years.length > 1;
@@ -1576,7 +1581,7 @@ function his() {
       '</div>' +
       (g.note ? '<div class="mu" style="margin-top:4px;">Catatan: ' + E(g.note) + '</div>' : '') +
     '</div>';
-  }).join('') || ('<div class="c mu">' + (hisYear != 'all' ? 'Belum ada servis di tahun ' + hisYear + '.' : 'Belum ada riwayat servis.') + '</div>');
+  }).join('') || ('<div class="c mu">Belum ada riwayat servis.</div>');
 }
 
 function recalc() {
@@ -1658,6 +1663,24 @@ var uid = function() { return 'x' + Date.now().toString(36) + Math.random().toSt
 document.addEventListener('click', function(e) {
   if (e.target.closest && e.target.closest('#logoBtn')) { loadDataFromSheet(true); return; }
   if (e.target.closest && e.target.closest('[data-drag]')) { e.preventDefault(); return; }
+  
+  if (e.target.id === 'exportBtn') {
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(R, null, 2));
+    var dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", "rawat_kendaraan_backup_" + today() + ".json");
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    toast('ok', 'Export Berhasil', 'File cadangan berhasil diunduh.');
+    return;
+  }
+  if (e.target.id === 'importBtn') {
+    var fileInp = $('#importFile');
+    if (fileInp) fileInp.click();
+    return;
+  }
+
   var zm = e.target.closest ? e.target.closest('[data-zoom]') : null;
   if (zm) { openLb(zm.getAttribute('src')); return; }
   if (e.target.closest && e.target.closest('#lb')) { closeLb(); return; }
@@ -1795,15 +1818,36 @@ document.addEventListener('click', function(e) {
   }
 });
 
-document.addEventListener('input', function(e) {
-  var t = e.target; if (!t.classList || !t.classList.contains('rp')) return;
-  var v = t.value, c = t.selectionStart == null ? v.length : t.selectionStart, d = v.slice(0, c).replace(/\D/g, '').length, f = fn(v);
-  t.value = f; var p = 0, k = 0; while (p < f.length && k < d) { if (/\d/.test(f[p])) k++; p++; }
-  try { t.setSelectionRange(p, p); } catch(x){}
-});
-
 document.addEventListener('change', function(e) {
-  var t = e.target, tr = t.closest ? t.closest('[data-id]') : null;
+  var t = e.target;
+  
+  if (t.id === 'importFile' && t.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        var parsed = JSON.parse(evt.target.result);
+        if (parsed && Array.isArray(parsed.vehicles)) {
+          R = parsed;
+          norm();
+          save();
+          S = R.vehicles[0] || null;
+          draw();
+          toast('ok', 'Import Berhasil', 'Data berhasil dipulihkan.');
+        } else {
+          alert('Format file JSON tidak valid.');
+        }
+      } catch(err) {
+        alert('Gagal membaca file JSON: ' + err.message);
+      }
+      t.value = '';
+    };
+    reader.readAsText(t.files[0]);
+    return;
+  }
+
+  if (t.classList && t.classList.contains('rp')) return;
+
+  var tr = t.closest ? t.closest('[data-id]') : null;
   if (t.dataset.hi) { 
     var h = (S.hist||[]).find(function(x) { return x.id == t.dataset.hi; }), f = t.dataset.hf; 
     if (h) { 
