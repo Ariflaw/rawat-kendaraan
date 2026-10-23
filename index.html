@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Rawat Kendaraan</title>
+<title>Rawat Kendaraan & SIM</title>
 <!-- Pengaturan PWA & Pintasan Mobile -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2563eb">
@@ -128,6 +128,14 @@ button.p { background: var(--primary); color: #fff; border: none; font-weight: 7
 details summary { cursor: pointer; font-weight: 700; font-size: 13px; min-height: 32px; display: flex; align-items: center; }
 details[open] summary { margin-bottom: 6px; }
 
+/* Styling Kartu SIM Tambahan */
+.sim-card { position: relative; border-left: 5px solid var(--primary); background: linear-gradient(135deg, var(--bg-card), var(--bg-subtle)); }
+.sim-card.er { border-left-color: var(--er-bg); }
+.sim-card.wa { border-left-color: var(--wa-bg); }
+.sim-card.ok { border-left-color: var(--ok-bg); }
+.sim-type-badge { display: inline-block; background: var(--primary); color: #fff; font-size: 13px; font-weight: 800; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.5px; }
+.sim-number { font-family: monospace; font-size: 13px; font-weight: 700; color: var(--text-muted); margin-top: 4px; }
+
 nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
   background: var(--bg-card); border-top: 1px solid var(--border-color);
@@ -150,7 +158,7 @@ nav button.on { color: var(--primary); font-weight: 800; background: var(--prima
 nav button.on svg { transform: translateY(-1px); }
 
 .nav-badge {
-  position: absolute; top: 3px; right: 22%;
+  position: absolute; top: 3px; right: 15%;
   background: var(--er-bg); color: #fff;
   font-size: 9px; font-weight: 800; border-radius: 99px;
   padding: 1px 5px; min-width: 15px; text-align: center;
@@ -478,7 +486,7 @@ body.dragging { -webkit-user-select: none; user-select: none; }
   <div class="app-header">
     <div class="brand">
       <div class="logo" id="logoBtn" title="Ketuk untuk perbarui data"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg><span id="sync" class="sdot" role="status"></span></div>
-      <h1 class="app-title">Rawat Kendaraan</h1>
+      <h1 class="app-title">Rawat Kendaraan & SIM</h1>
     </div>
     <div class="header-actions">
       <button class="notif-btn" id="btnNotifModal" aria-label="Pengaturan Notifikasi" title="Pengaturan Notifikasi">
@@ -499,7 +507,7 @@ body.dragging { -webkit-user-select: none; user-select: none; }
       <button class="modal-close" id="closeNotifModal">✕</button>
     </div>
     <div style="font-size: 13px; color: var(--text-muted); line-height: 1.45; margin-bottom: 16px;">
-      Atur izin notifikasi browser untuk mendapatkan pengingat otomatis mengenai jadwal servis komponen dan jatuh tempo pajak kendaraan Anda.
+      Atur izin notifikasi browser untuk mendapatkan pengingat otomatis mengenai jadwal servis komponen, pajak kendaraan, dan masa berlaku SIM Anda.
     </div>
     <div style="background: var(--bg-subtle); padding: 12px; border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
       <div>
@@ -512,6 +520,43 @@ body.dragging { -webkit-user-select: none; user-select: none; }
       <button class="p" id="toggleNotifAction" style="width: 100%;">Aktifkan Notifikasi</button>
       <button class="btn-outline" id="testNotifBtn" style="width: 100%;">Kirim Contoh Notifikasi</button>
     </div>
+  </div>
+</div>
+
+<!-- Modal Tambah SIM Baru -->
+<div id="modalAddSIM" class="modal-overlay" role="dialog" aria-label="Tambah SIM">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title">🪪 Tambah SIM Baru</h3>
+      <button class="modal-close" id="closeSIMModal">✕</button>
+    </div>
+    <form id="formSIM" style="display: flex; flex-direction: column; gap: 10px;">
+      <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">
+        Jenis SIM
+        <select id="simType" required style="width: 100%; margin-top: 4px;">
+          <option value="SIM C">SIM C (Sepeda Motor)</option>
+          <option value="SIM C1">SIM C1 (Motor 250cc-500cc)</option>
+          <option value="SIM C2">SIM C2 (Motor >500cc)</option>
+          <option value="SIM A">SIM A (Mobil / Penumpang)</option>
+          <option value="SIM B1">SIM B1 (Bus / Truk Sedang)</option>
+          <option value="SIM B2">SIM B2 (Truk Gandeng / Alat Berat)</option>
+          <option value="SIM D">SIM D (Disabilitas)</option>
+        </select>
+      </label>
+      <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">
+        Nomor SIM
+        <input type="text" id="simNum" placeholder="Contoh: 1234-5678-9012" required style="width: 100%; margin-top: 4px;">
+      </label>
+      <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">
+        Nama Pemilik (Sesuai SIM)
+        <input type="text" id="simOwner" placeholder="Nama lengkap pemilik" required style="width: 100%; margin-top: 4px;">
+      </label>
+      <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">
+        Tanggal Habis Berlaku SIM
+        <input type="date" id="simExpDate" required style="width: 100%; margin-top: 4px;">
+      </label>
+      <button type="submit" class="p" style="margin-top: 10px; width: 100%;">Simpan Data SIM</button>
+    </form>
   </div>
 </div>
 
@@ -753,10 +798,13 @@ function catFields() {
   return h + '<div style="flex:1 1 100%;">' + sb + '</div>';
 }
 
-var R = { vehicles: [] };
+var R = { vehicles: [], sims: [] };
 try { 
   var saved = localStorage.getItem(K);
-  if (saved) R = JSON.parse(saved); 
+  if (saved) {
+    R = JSON.parse(saved); 
+    if (!R.sims) R.sims = [];
+  }
 } catch(e){}
 
 function recalcVehicle(v) {
@@ -775,8 +823,9 @@ function recalcVehicle(v) {
 }
 
 function norm() {
-  if (!R || typeof R != 'object') R = { vehicles: [] };
-  if (!R.vehicles) R = { vehicles: R.comps ? [Object.assign({ id: 'v1', jenis: 'motor' }, R)] : [] };
+  if (!R || typeof R != 'object') R = { vehicles: [], sims: [] };
+  if (!R.sims) R.sims = [];
+  if (!R.vehicles) R = { vehicles: R.comps ? [Object.assign({ id: 'v1', jenis: 'motor' }, R)] : [], sims: R.sims };
   R.vehicles.forEach(function(v) {
     v.jenis = v.jenis || 'motor';
     v.info = v.info || {};
@@ -802,8 +851,6 @@ try { homeView = localStorage.getItem('servisMotor_view') === 'big' ? 'big' : 'l
 var editIds = null, editNames = null;
 
 var withV = function(v, f) { var k = S; S = v; try { return f(); } finally { S = k; } };
-var $ = function(s) { return document.querySelector(s); };
-var E = function(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function(m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]; }); };
 var _t, _busy = false, _again = false;
 
 var sync = function(m) {
@@ -1021,12 +1068,6 @@ function compLv(c, s) {
   return lvOf(urgPct(c, s));
 }
 
-var dt = function(d) {
-  if (!d) return '';
-  var parsed = new Date(d + 'T00:00:00');
-  return isNaN(parsed.getTime()) ? '' : parsed.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-};
-
 function lateStr(d) {
   var a = new Date(d + 'T00:00:00'), n = new Date(today() + 'T00:00:00');
   if (isNaN(a.getTime()) || a >= n) return '';
@@ -1129,7 +1170,8 @@ var ICONS = {
   dash: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
   komp: '<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>',
   svc: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>',
-  his: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>'
+  his: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
+  sim: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>'
 };
 
 function countUrgentItems() {
@@ -1144,13 +1186,19 @@ function countUrgentItems() {
   return cnt;
 }
 
-// Hitung total seluruh kendaraan yang mendesak untuk badge App & Header
 function calcTotalGlobalUrgent() {
   var total = 0;
   (R.vehicles || []).forEach(function(v) {
     withV(v, function() {
       total += countUrgentItems();
     });
+  });
+  // Hitung juga SIM yang hampir habis/kedaluwarsa
+  var todayDate = new Date();
+  (R.sims || []).forEach(function(sim) {
+    var expDate = new Date(sim.expDate);
+    var diffDays = Math.ceil((expDate - todayDate) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 30) total++;
   });
   return total;
 }
@@ -1179,20 +1227,27 @@ function updateHeaderBadge() {
 }
 
 function nav() {
-  var on = S && tab != 'home';
   var navEl = $('#nav');
   if (navEl) {
-    navEl.style.display = on ? 'flex' : 'none';
-    if (on) {
-      var uCount = countUrgentItems();
-      var badgeHtml = uCount > 0 ? '<span class="nav-badge">' + uCount + '</span>' : '';
+    navEl.style.display = 'flex';
+    var uCount = calcTotalGlobalUrgent();
+    var badgeHtml = uCount > 0 ? '<span class="nav-badge">' + uCount + '</span>' : '';
 
+    if (!S || tab == 'home' || tab == 'simlist') {
+      navEl.innerHTML = [
+        ['home', 'home', 'Kendaraan'],
+        ['simlist', 'sim', 'SIM Saya', badgeHtml]
+      ].map(function(t) {
+        return '<button class="' + (tab == t[0] ? 'on' : '') + '" data-nav="' + t[0] + '">' + ICONS[t[1]] + (t[3] || '') + '<span>' + t[2] + '</span></button>';
+      }).join('');
+    } else {
       navEl.innerHTML = [
         ['motor', 'home', 'Ringkasan'],
         ['dash', 'dash', 'Jadwal', badgeHtml],
         ['komp', 'komp', 'Komponen'],
         ['svc', 'svc', 'Servis'],
-        ['his', 'his', 'Riwayat']
+        ['his', 'his', 'Riwayat'],
+        ['simlist', 'sim', 'SIM']
       ].map(function(t) { 
         return '<button class="' + (tab == t[0] ? 'on' : '') + '" data-nav="' + t[0] + '">' + ICONS[t[1]] + (t[3] || '') + '<span>' + t[2] + '</span></button>'; 
       }).join('');
@@ -1761,14 +1816,77 @@ function home() {
   '<div class="r"><button class="p" data-addv="motor" style="flex:1;">+ Tambah Motor</button><button class="p" data-addv="mobil" style="flex:1;">+ Tambah Mobil</button></div>';
 }
 
+// ==========================================
+// RENDER HALAMAN SIM
+// ==========================================
+function renderSIMs() {
+  var container = $('#simListContainer');
+  if (!container) return;
+  var sims = R.sims || [];
+
+  if (sims.length === 0) {
+    container.innerHTML = '<div class="c" style="text-align:center; color:var(--text-muted); padding:24px;">Belum ada data SIM yang disimpan.<br>Silakan ketuk tombol "+ Tambah SIM" di atas.</div>';
+    return;
+  }
+
+  var todayDate = new Date();
+  container.innerHTML = sims.map(function(sim, idx) {
+    var expDate = new Date(sim.expDate);
+    var diffTime = expDate - todayDate;
+    var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    var badgeClass = "ok";
+    var badgeText = "✓ Aman";
+    if (diffDays < 0) {
+      badgeClass = "er";
+      badgeText = "❌ Kedaluwarsa (" + Math.abs(diffDays) + " hari lalu)";
+    } else if (diffDays <= 30) {
+      badgeClass = "wa";
+      badgeText = "⚠️ H-" + diffDays + " Hari";
+    } else {
+      var diffYears = (diffDays / 365).toFixed(1);
+      badgeText = "✓ Aman (" + diffYears + " Tahun)";
+    }
+
+    return '<div class="c sim-card ' + badgeClass + '">' +
+      '<div style="display: flex; justify-content: space-between; align-items: flex-start;">' +
+        '<div>' +
+          '<span class="sim-type-badge">' + E(sim.type) + '</span>' +
+          '<div class="sim-number">NO: ' + E(sim.num) + '</div>' +
+        '</div>' +
+        '<span class="b ' + badgeClass + '">' + badgeText + '</span>' +
+      '</div>' +
+      '<div style="margin-top: 12px; font-size: 12px; color: var(--text-muted); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">' +
+        '<div>Nama Pemilik:<br><b style="color: var(--text-main);">' + E(sim.owner) + '</b></div>' +
+        '<div>Masa Berlaku:<br><b style="color: var(--text-main);">' + dt(sim.expDate) + '</b></div>' +
+      '</div>' +
+      (diffDays <= 30 ? '<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); font-size: 11px; color: var(--wa-bg); font-weight: 700;">📌 Masa berlaku SIM hampir habis! Segera perpanjangan online via aplikasi SINAR atau ke Satpas terdekat agar tidak perlu bikin baru dari awal.</div>' : '') +
+      '<div style="margin-top: 10px; text-align: right;"><button class="btn-outline" style="font-size:11px; padding:4px 8px; color:var(--er-bg); border-color:var(--er-bg);" data-delsim="' + idx + '">Hapus SIM</button></div>' +
+    '</div>';
+  }).join('');
+}
+
+function simListView() {
+  return '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">' +
+    '<h3 style="margin: 0; font-size: 16px;">🪪 SIM & Dokumen Driver</h3>' +
+    '<button class="p" id="openSIMModalBtn" style="padding: 6px 12px; font-size: 12px;">+ Tambah SIM</button>' +
+  '</div>' +
+  '<div id="simListContainer"></div>';
+}
+
 function draw() {
-  if (!S && tab != 'home') tab = 'home';
+  if (!S && tab != 'home' && tab != 'simlist') tab = 'home';
   nav();
   updateHeaderBadge();
   updateAppBadge();
   var vEl = $('#v');
   if (vEl) {
     try {
+      if (tab === 'simlist') {
+        vEl.innerHTML = simListView();
+        renderSIMs();
+        return;
+      }
       var fnMap = { home: home, motor: motor, dash: dash, komp: komp, svc: svc, his: his };
       var renderFn = fnMap[tab] || home;
       vEl.innerHTML = (S && tab != 'home' && !(tab == 'motor' && !editM) ? bar() : '') + renderFn();
@@ -1811,9 +1929,6 @@ function saveComponentDetails(compId) {
   toast('ok', 'Komponen Disimpan', 'Data ' + E(comp.name) + ' berhasil diperbarui.');
 }
 
-// ==========================================
-// FITUR MODAL PENGATURAN NOTIFIKASI
-// ==========================================
 function openNotifModal() {
   var modal = $('#notifModal');
   if (!modal) return;
@@ -1928,6 +2043,24 @@ function checkAllNotifications() {
     });
   });
 
+  // Cek masa berlaku SIM
+  var todayDate = new Date();
+  (R.sims || []).forEach(function(sim) {
+    var expDate = new Date(sim.expDate);
+    var diffDays = Math.ceil((expDate - todayDate) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 30 && diffDays >= 0) {
+      sendLocalNotif("🪪 Pengingat Masa Berlaku SIM", {
+        body: sim.type + " atas nama " + sim.owner + " akan kedaluwarsa dalam " + diffDays + " hari lagi!",
+        icon: "/manifest.json"
+      });
+    } else if (diffDays < 0) {
+      sendLocalNotif("🚨 SIM Telat/Kedaluwarsa!", {
+        body: sim.type + " atas nama " + sim.owner + " sudah kedaluwarsa! Segera perpanjang.",
+        icon: "/manifest.json"
+      });
+    }
+  });
+
   localStorage.setItem('last_notif_check_date', todayStr);
 }
 
@@ -1936,6 +2069,32 @@ document.addEventListener('click', function(e) {
   if (e.target.closest && e.target.closest('#closeNotifModal')) { closeNotifModal(); return; }
   if (e.target.closest && e.target.closest('#notifModal') && e.target.id === 'notifModal') { closeNotifModal(); return; }
   if (e.target.closest && e.target.closest('#toggleNotifAction')) { handleNotifActionBtn(); return; }
+  
+  if (e.target.id === 'openSIMModalBtn' || e.target.closest('#openSIMModalBtn')) {
+    $('#modalAddSIM').classList.add('show');
+    return;
+  }
+  if (e.target.id === 'closeSIMModal' || e.target.closest('#closeSIMModal')) {
+    $('#modalAddSIM').classList.remove('show');
+    return;
+  }
+  if (e.target.id === 'modalAddSIM' && e.target === $('#modalAddSIM')) {
+    $('#modalAddSIM').classList.remove('show');
+    return;
+  }
+
+  var delSimBtn = e.target.closest ? e.target.closest('[data-delsim]') : null;
+  if (delSimBtn !== null) {
+    var idx = parseInt(delSimBtn.dataset.delsim, 10);
+    if (confirm('Yakin ingin menghapus data SIM ini?')) {
+      R.sims.splice(idx, 1);
+      save();
+      renderSIMs();
+      toast('er', 'Data SIM Dihapus', 'Data berhasil dihapus dari daftar.');
+    }
+    return;
+  }
+
   if (e.target.closest && e.target.closest('#testNotifBtn')) {
     if ("Notification" in window && Notification.permission === "granted") {
       sendLocalNotif("🛠️ Tes Notifikasi Rawat Kendaraan", { body: "Fitur pengingat berfungsi dengan baik!", icon: "/manifest.json" });
@@ -1981,6 +2140,7 @@ document.addEventListener('click', function(e) {
   var navBtn = e.target.closest ? e.target.closest('[data-nav]') : null;
   if (navBtn) {
     tab = navBtn.dataset.nav;
+    if (tab === 'home') S = null;
     editIds = null;
     draw();
     scrollTo(0, 0);
@@ -2109,7 +2269,26 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// Live formatting untuk input berkelas 'rp' (angka/rupiah)
+// Form Submit SIM
+document.addEventListener('submit', function(e) {
+  if (e.target && e.target.id === 'formSIM') {
+    e.preventDefault();
+    var newSim = {
+      type: $('#simType').value,
+      num: $('#simNum').value,
+      owner: $('#simOwner').value,
+      expDate: $('#simExpDate').value
+    };
+    if (!R.sims) R.sims = [];
+    R.sims.push(newSim);
+    save();
+    $('#modalAddSIM').classList.remove('show');
+    e.target.reset();
+    renderSIMs();
+    toast('ok', 'Berhasil', 'Data SIM baru berhasil disimpan.');
+  }
+});
+
 document.addEventListener('input', function(e) {
   var t = e.target;
   if (t && t.classList && t.classList.contains('rp')) {
@@ -2274,7 +2453,7 @@ document.addEventListener('focusout', function() {
 });
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') { closeLb(); closeNotifModal(); }
+  if (e.key === 'Escape') { closeLb(); closeNotifModal(); $('#modalAddSIM').classList.remove('show'); }
   if (e.key === 'Enter' && e.target && e.target.id === 'km') { var b = $('#setkm'); if (b) b.click(); }
 });
 
