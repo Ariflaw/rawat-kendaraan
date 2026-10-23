@@ -100,7 +100,7 @@ input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px 
 button { cursor: pointer; font-weight: 600; }
 button.p { background: var(--primary); color: #fff; border: none; font-weight: 700; }
 
-.btn-outline { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; transition: all 0.15s ease; min-height: 32px; }
+.btn-outline { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.15s ease; min-height: 36px; }
 .btn-outline:active { background: var(--bg-subtle); transform: scale(0.98); }
 
 .bar { height: 6px; background: var(--bg-subtle); border-radius: 99px; overflow: hidden; margin-top: 6px; }
@@ -1521,16 +1521,21 @@ function his() {
   (S.hist||[]).concat(S.comps||[]).forEach(function(x) { if (x.brand && BRL.indexOf(x.brand) === -1) BRL.push(x.brand); });
   var dl = editIds ? getShopListHTML() + '<datalist id="cl">' + (S.comps||[]).map(function(c) { return '<option value="' + E(c.name) + '">'; }).join('') + '</datalist><datalist id="brl">' + BRL.map(function(b) { return '<option value="' + E(b) + '">'; }).join('') + '</datalist>' : '';
 
+  // Penataan UX & Layout yang lebih rapi: Tombol Export/Import dibungkus kartu terpisah yang bersih
   var toolbar = '<div class="c htool">' +
-    '<div class="seg txt wide" style="margin-bottom:8px;"><button data-hv="list" class="' + (hisView == 'list' ? 'on' : '') + '">Riwayat</button><button data-hv="stat" class="' + (hisView == 'stat' ? 'on' : '') + '">Statistik</button></div>' +
-    '<div style="display:flex; gap:6px; margin-bottom:8px;">' +
-      '<button class="btn-outline" id="exportBtn" style="flex:1; justify-content:center;">📤 Export JSON</button>' +
-      '<button class="btn-outline" id="importBtn" style="flex:1; justify-content:center;">📥 Import JSON</button>' +
-      '<input type="file" id="importFile" accept=".json" style="display:none">' +
-    '</div>' +
+    '<div class="seg txt wide" style="margin-bottom:10px;"><button data-hv="list" class="' + (hisView == 'list' ? 'on' : '') + '">Riwayat</button><button data-hv="stat" class="' + (hisView == 'stat' ? 'on' : '') + '">Statistik</button></div>' +
     ((S.hist || []).length ? '<div class="chips"><button class="chip ' + (hisYear == 'all' ? 'on' : '') + '" data-hy="all">Semua</button>' + years.map(function(y) { return '<button class="chip ' + (hisYear == y ? 'on' : '') + '" data-hy="' + y + '">' + y + '</button>'; }).join('') + '</div>' : '') +
     (hisView == 'list' && (S.hist || []).length ? '<div class="row sortrow"><span class="mu">Urutkan</span><div class="seg txt"><button data-hs="new" class="' + (hisSort == 'new' ? 'on' : '') + '">Terbaru</button><button data-hs="old" class="' + (hisSort == 'old' ? 'on' : '') + '">Terlama</button><button data-hs="price" class="' + (hisSort == 'price' ? 'on' : '') + '">Termahal</button></div></div>' : '') +
+  '</div>' +
+  '<div class="c" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px;">' +
+    '<div><div style="font-size:12px; font-weight:700;">Cadangan Data (JSON)</div><div class="mu">Simpan atau pulihkan data kendaraan</div></div>' +
+    '<div style="display:flex; gap:6px;">' +
+      '<button class="btn-outline" id="exportBtn" style="padding:4px 10px; min-height:32px; font-size:11.5px;">📤 Export</button>' +
+      '<button class="btn-outline" id="importBtn" style="padding:4px 10px; min-height:32px; font-size:11.5px;">📥 Import</button>' +
+      '<input type="file" id="importFile" accept=".json" style="display:none">' +
+    '</div>' +
   '</div>';
+
   if (hisView == 'stat') return dl + toolbar + hisStat(H, years);
 
   var showYH = hisYear == 'all' && hisSort != 'price' && years.length > 1;
@@ -1996,7 +2001,7 @@ window.addEventListener('focus', function() {
   if (!_busy) loadDataFromSheet(false);
 });
 document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible' && !_busy) {
+  if (document.visibilityState === 'visible' & !_busy) {
     loadDataFromSheet(false);
   }
 });
