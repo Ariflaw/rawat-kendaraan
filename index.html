@@ -1841,23 +1841,64 @@ document.addEventListener('change', function(e) {
   
   if (t.id === 'notaFile' && t.files[0]) {
     var file = t.files[0];
-    var reader = new FileReader();
     var statusEl = $('#scanStatus');
     var btnScan = $('#btnScanNota');
     
     if (statusEl) statusEl.style.display = 'block';
     if (btnScan) btnScan.disabled = true;
 
-    reader.onload = async function(uploadEvent) {
-      var base64Image = uploadEvent.target.result;
-      try {
-        var response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ base64Image: base64Image })
+    // Gunakan Canvas untuk kompresi gambar otomatis sebelum dikirim
+    var img = new Image();
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+      img.src = e.target.result;
+    };
+
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+
+      // Batasi resolusi maksimal 1200px (sangat cukup untuk dibaca AI)
+      var maxDim = 1200;
+      var width = img.width;
+      var height = img.height;
+
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Kompres ke JPEG kualitas 0.7 (ukuran jadi ~200KB - 500KB)
+      var base64Image = canvas.toDataURL('image/jpeg', 0.7);
+
+      fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64Image: base64Image })
+      })
+      .then(function(res) {
+        return res.text().then(function(text) {
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            throw new Error("Respon server bukan JSON: " + text.slice(0, 80));
+          }
         });
-        var result = await response.json();
-        if (!response.ok || !result.success) throw new Error(result.error || 'Gagal memproses nota.');
+      })
+      .then(function(result) {
+        if (!result.success) throw new Error(result.error || 'Gagal memproses nota.');
 
         var data = result.data;
         if (data.date) { var sdEl = $('#sd'); if (sdEl) sdEl.value = data.date; }
@@ -1893,14 +1934,17 @@ document.addEventListener('change', function(e) {
 
         svcCount();
         toast('ok', 'Scan Berhasil', 'Data nota berhasil diekstrak oleh AI Gemini.');
-      } catch (err) {
+      })
+      .catch(function(err) {
         toast('er', 'Gagal Scan Nota', err.message);
-      } finally {
+      })
+      .finally(function() {
         if (statusEl) statusEl.style.display = 'none';
         if (btnScan) btnScan.disabled = false;
         t.value = '';
-      }
+      });
     };
+
     reader.readAsDataURL(file);
     return;
   }
