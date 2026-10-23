@@ -1391,13 +1391,6 @@ function svc() {
   (S.hist||[]).concat(S.comps).forEach(function(x) { if (x.brand && BR.indexOf(x.brand) === -1) BR.push(x.brand); });
   
   return getShopListHTML() +
-  '<div class="c" style="border: 2px dashed var(--primary); background: var(--primary-light); text-align: center; padding: 16px;">' +
-    '<b style="font-size: 14px; color: var(--primary);">🤖 Scan Nota Servis dengan AI</b>' +
-    '<div class="mu" style="margin: 4px 0 10px;">Unggah foto nota/struk, AI akan otomatis mengisi tanggal, KM, bengkel, dan rincian servis.</div>' +
-    '<input type="file" id="notaFile" accept="image/*" style="display:none;">' +
-    '<button class="p" id="btnScanNota" style="width: 100%; min-height: 42px;">📷 Unggah & Scan Foto Nota</button>' +
-    '<div id="scanStatus" class="mu" style="margin-top: 8px; font-weight: 700; display: none;">Memproses nota dengan Gemini AI...</div>' +
-  '</div>' +
   '<div class="c">' +
     '<div class="r">' +
       '<label>Tanggal<input id="sd" type="date" value="' + d + '"></label>' +
@@ -1704,13 +1697,6 @@ document.addEventListener('click', function(e) {
     return;
   }
 
-  var btnScan = e.target.closest ? e.target.closest('#btnScanNota') : null;
-  if (btnScan) {
-    var fileInput = $('#notaFile');
-    if (fileInput) fileInput.click();
-    return;
-  }
-
   var hvb = e.target.closest ? e.target.closest('[data-hv]') : null;
   if (hvb) { hisView = hvb.dataset.hv == 'stat' ? 'stat' : 'list'; draw(); return; }
   var hyb = e.target.closest ? e.target.closest('[data-hy]') : null;
@@ -1807,20 +1793,6 @@ document.addEventListener('click', function(e) {
     recalc();
     if (km_val > S.km) { S.km = km_val; S.kmTgl = date; } save(); tab = 'his'; draw();
   }
-  else if (t.id == 'exp') {
-    var q_csv = function(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
-    var csv = 'Tanggal,KM,Komponen,Harga,Tempat,Catatan,Merek\n' + (S.hist||[]).map(function(h) { return [h.date, h.km, h.comp, h.price, h.shop, h.note, h.brand].map(q_csv).join(','); }).join('\n');
-    try { var u = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })), l = document.createElement('a'); l.href = u; l.download = 'riwayat-servis.csv'; document.body.appendChild(l); l.click(); l.remove(); } catch(x) { alert('Ekspor tidak didukung di sini. Data tersimpan di Supabase.'); }
-  }
-  else if (t.id == 'imp') {
-    var raw = prompt('Tempel isi CSV (tanpa header: Tanggal,KM,Komponen,Harga,Tempat,Catatan,Merek):'); if (!raw) return;
-    raw.split('\n').forEach(function(l) {
-      if (!l.trim() || /^Ingrese|^"?tanggal/i.test(l)) return;
-      var p_csv = (l.match(/("([^"]|"")*"|[^,]*)(,|$)/g) || []).map(function(s) { return s.replace(/,$/, '').replace(/^"|"$/g, '').replace(/""/g, '"'); });
-      if (p_csv[0] && p_csv[2]) (S.hist=S.hist||[]).push({ id: uid(), date: p_csv[0], km: +p_csv[1] || 0, comp: p_csv[2], price: +p_csv[3] || 0, shop: p_csv[4] || '', note: p_csv[5] || '', brand: p_csv[6] || '' });
-    }); 
-    recalc(); save(); draw();
-  }
 });
 
 document.addEventListener('input', function(e) {
@@ -1830,111 +1802,8 @@ document.addEventListener('input', function(e) {
   try { t.setSelectionRange(p, p); } catch(x){}
 });
 
-// LOGIKA PEMANGGILAN BACKEND VERCEL SCAN NOTA
-document.addEventListener('change', async function(e) {
+document.addEventListener('change', function(e) {
   var t = e.target, tr = t.closest ? t.closest('[data-id]') : null;
-  
-  if (t.id === 'notaFile' && t.files[0]) {
-    var file = t.files[0];
-    var statusEl = $('#scanStatus');
-    var btnScan = $('#btnScanNota');
-    
-    if (statusEl) statusEl.style.display = 'block';
-    if (btnScan) btnScan.disabled = true;
-
-    try {
-      var reader = new FileReader();
-      reader.readAsDataURL(file);
-      
-      reader.onload = function(uploadEvent) {
-        var img = new Image();
-        img.src = uploadEvent.target.result;
-        
-        img.onload = function() {
-          var canvas = document.createElement('canvas');
-          var ctx = canvas.getContext('2d');
-          var maxDim = 1000;
-          var width = img.width, height = img.height;
-
-          if (width > height) {
-            if (width > maxDim) { height = Math.round((height * maxDim) / width); width = maxDim; }
-          } else {
-            if (height > maxDim) { width = Math.round((width * maxDim) / height); height = maxDim; }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          ctx.drawImage(img, 0, 0, width, height);
-          var base64Data = canvas.toDataURL('image/jpeg', 0.7);
-
-          fetch('/api/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ base64Image: base64Data })
-          })
-          .then(function(res) {
-            return res.text().then(function(text) {
-              try {
-                return JSON.parse(text);
-              } catch (err) {
-                throw new Error("Respon server bukan JSON: " + text.slice(0, 80));
-              }
-            });
-          })
-          .then(function(result) {
-            if (!result.success) throw new Error(result.error || 'Gagal memproses nota.');
-
-            var data = result.data;
-            if (data.date) { var sdEl = $('#sd'); if (sdEl) sdEl.value = data.date; }
-            if (data.km && data.km > 0) { var skEl = $('#sk'); if (skEl) skEl.value = data.km; }
-            if (data.shop) { var ssEl = $('#ss'); if (ssEl) ssEl.value = data.shop; }
-            if (data.note) { var snEl = $('#sn'); if (snEl) snEl.value = data.note; }
-
-            var allFetchedItems = (data.items || []).concat(data.extraItems || []);
-            allFetchedItems.forEach(function(item) {
-              var matchedComp = (S.comps || []).find(function(c) {
-                return c.name.toLowerCase().includes(item.name.toLowerCase()) || item.name.toLowerCase().includes(c.name.toLowerCase());
-              });
-              if (matchedComp) {
-                var chk = document.querySelector('[data-ck="' + matchedComp.id + '"]');
-                if (chk) { chk.checked = true; chk.closest('.it').classList.add('on'); }
-                var prInput = document.querySelector('[data-pr="' + matchedComp.id + '"]');
-                if (prInput) prInput.value = fn(item.price);
-              } else {
-                var xlist = $('#xlist');
-                if (xlist) {
-                  xlist.insertAdjacentHTML('beforeend', xRow(xlist.querySelectorAll('.xi').length + 1, true));
-                  var lastRow = xlist.lastElementChild;
-                  var nameInp = lastRow.querySelector('.xn');
-                  var priceInp = lastRow.querySelector('.xp');
-                  if (nameInp) nameInp.value = item.name;
-                  if (priceInp) priceInp.value = fn(item.price);
-                }
-              }
-            });
-
-            svcCount();
-            toast('ok', 'Scan Berhasil', 'Data nota berhasil dibaca oleh AI Gemini.');
-          })
-          .catch(function(err) {
-            toast('er', 'Gagal Scan Nota', err.message);
-          })
-          .finally(function() {
-            if (statusEl) statusEl.style.display = 'none';
-            if (btnScan) btnScan.disabled = false;
-            t.value = '';
-          });
-        };
-      };
-    } catch (err) {
-      toast('er', 'Gagal Scan Nota', err.message);
-      if (statusEl) statusEl.style.display = 'none';
-      if (btnScan) btnScan.disabled = false;
-      t.value = '';
-    }
-    return;
-  }
-
   if (t.dataset.hi) { 
     var h = (S.hist||[]).find(function(x) { return x.id == t.dataset.hi; }), f = t.dataset.hf; 
     if (h) { 
