@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+  
 <!-- Pengaturan PWA & Pintasan Mobile -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#2563eb">
@@ -133,7 +133,7 @@ details[open] summary { margin-bottom: 6px; }
 nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
   background: var(--bg-card); border-top: 1px solid var(--border-color);
-  display: flex; justify-content: space-around;
+  display: flex; justify-space-around;
   padding: 4px 2px calc(4px + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
@@ -359,6 +359,9 @@ body.typing #savesvc { position: static; box-shadow: none; }
 .kn { display: block; font-size: 15px; line-height: 1.3; overflow-wrap: anywhere; }
 .kmeta { line-height: 1.35; margin-top: 2px; }
 .kbody { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
+
+.btn-save-comp { width: 100%; margin-top: 12px; background: var(--primary); color: #fff; font-weight: 700; border: none; min-height: 42px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-save-comp:active { background: var(--primary-hover); transform: scale(0.99); }
 
 .addx { width: 100%; margin-top: 10px; border: 1.5px dashed var(--primary); color: var(--primary); background: transparent; font-weight: 700; min-height: 44px; }
 .xh { display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: var(--text-muted); }
@@ -1376,6 +1379,7 @@ function komp() {
       '<label>Interval Pabrik (KM)<input class="rp" type="text" inputmode="numeric" data-f="f" value="' + fn(c.f) + '"></label>' +
       '<label>Interval Custom (KM)<input class="rp" type="text" inputmode="numeric" data-f="c" value="' + fn(c.c) + '" ' + (c.mode=='f'?'disabled':'') + '></label>' +
     '</div>' +
+    '<button class="btn-save-comp" data-savecomp="' + c.id + '">💾 Simpan Perubahan</button>' +
     '</div>' +
   '</details>'; }).join('');
 }
@@ -1526,7 +1530,6 @@ function his() {
   (S.hist||[]).concat(S.comps||[]).forEach(function(x) { if (x.brand && BRL.indexOf(x.brand) === -1) BRL.push(x.brand); });
   var dl = editIds ? getShopListHTML() + '<datalist id="cl">' + (S.comps||[]).map(function(c) { return '<option value="' + E(c.name) + '">'; }).join('') + '</datalist><datalist id="brl">' + BRL.map(function(b) { return '<option value="' + E(b) + '">'; }).join('') + '</datalist>' : '';
 
-  // Penataan UX & Layout yang lebih rapi: Tombol Export/Import dibungkus kartu terpisah yang bersih
   var toolbar = '<div class="c htool">' +
     '<div class="seg txt wide" style="margin-bottom:10px;"><button data-hv="list" class="' + (hisView == 'list' ? 'on' : '') + '">Riwayat</button><button data-hv="stat" class="' + (hisView == 'stat' ? 'on' : '') + '">Statistik</button></div>' +
     ((S.hist || []).length ? '<div class="chips"><button class="chip ' + (hisYear == 'all' ? 'on' : '') + '" data-hy="all">Semua</button>' + years.map(function(y) { return '<button class="chip ' + (hisYear == y ? 'on' : '') + '" data-hy="' + y + '">' + y + '</button>'; }).join('') + '</div>' : '') +
@@ -1670,10 +1673,47 @@ function draw() {
 
 var uid = function() { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); };
 
+function saveComponentDetails(compId) {
+  var card = document.querySelector('.kc[data-id="' + compId + '"]');
+  if (!card || !S || !S.comps) return;
+
+  var comp = S.comps.find(function(c) { return c.id === compId; });
+  if (!comp) return;
+
+  var inpName = card.querySelector('[data-f="name"]');
+  var inpSpec = card.querySelector('[data-f="spec"]');
+  var inpMode = card.querySelector('[data-f="mode"]');
+  var inpLast = card.querySelector('[data-f="last"]');
+  var inpLastDate = card.querySelector('[data-f="lastDate"]');
+  var inpMBulan = card.querySelector('[data-f="mBulan"]');
+  var inpF = card.querySelector('[data-f="f"]');
+  var inpC = card.querySelector('[data-f="c"]');
+
+  if (inpName) comp.name = inpName.value.trim() || comp.name;
+  if (inpSpec) comp.spec = inpSpec.value.trim();
+  if (inpMode) comp.mode = inpMode.value;
+  if (inpLast) comp.last = pn(inpLast.value);
+  if (inpLastDate) comp.lastDate = inpLastDate.value;
+  if (inpMBulan) comp.mBulan = pn(inpMBulan.value);
+  if (inpF) comp.f = pn(inpF.value);
+  if (inpC) comp.c = pn(inpC.value);
+
+  comp.set = true;
+  save();
+  draw();
+  toast('ok', 'Komponen Disimpan', 'Data ' + E(comp.name) + ' berhasil diperbarui.');
+}
+
 document.addEventListener('click', function(e) {
   if (e.target.closest && e.target.closest('#logoBtn')) { loadDataFromSheet(true); return; }
   if (e.target.closest && e.target.closest('[data-drag]')) { e.preventDefault(); return; }
   
+  var btnSaveComp = e.target.closest ? e.target.closest('[data-savecomp]') : null;
+  if (btnSaveComp) {
+    saveComponentDetails(btnSaveComp.dataset.savecomp);
+    return;
+  }
+
   if (e.target.id === 'exportBtn') {
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(R, null, 2));
     var dlAnchor = document.createElement('a');
@@ -1879,17 +1919,11 @@ document.addEventListener('change', function(e) {
   if (tr && t.dataset.f) {
     var c_comp = (S.comps||[]).find(function(c) { return c.id == tr.dataset.id; }), f_comp = t.dataset.f;
     if (!c_comp) return;
-    if (f_comp == 'next') { 
-      c_comp.last = Math.max(0, pn(t.value) - iv(c_comp)); 
-      c_comp.set = true; 
-    } 
-    else { 
-      c_comp[f_comp] = ['name', 'mode', 'lastDate', 'spec'].indexOf(f_comp) !== -1 ? t.value : pn(t.value); 
-      if (f_comp == 'last' || f_comp == 'lastDate') c_comp.set = true;
+    if (f_comp == 'mode') {
+      c_comp.mode = t.value;
+      var inpC = tr.querySelector('[data-f="c"]');
+      if (inpC) inpC.disabled = (t.value === 'f');
     }
-    save();
-    if (f_comp == 'name') { var kn = tr.querySelector('.kn'); if (kn) kn.textContent = t.value; }
-    if (f_comp == 'mode') draw();
   }
   else if (['merek', 'model', 'kat', 'cool', 'kunci', 'trans', 'bbm', 'drv'].indexOf(t.dataset.i) !== -1) { catChange(t.dataset.i, t.value); }
   else if (['cc', 'stnkMode', 'stnkTerbit', 'pajakStatus'].indexOf(t.dataset.i) !== -1) {
