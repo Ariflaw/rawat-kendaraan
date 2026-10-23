@@ -319,8 +319,8 @@ body.typing #savesvc { position: static; box-shadow: none; }
 .bm { min-width: 0; }
 .app-title { font-size: 21px; line-height: 1.1; font-weight: 800; letter-spacing: -.4px; margin: 0; display: block; }
 
-.header-actions { display: flex; items-center; gap: 6px; }
-.theme-btn, .notif-btn { flex: none; width: 42px; height: 42px; min-height: 0; padding: 0; border-radius: 50%; font-size: 18px; line-height: 1; display: grid; place-items: center; box-shadow: var(--shadow-sm); }
+.header-actions { display: flex; align-items: center; gap: 6px; }
+.theme-btn, .notif-btn { flex: none; width: 42px; height: 42px; min-height: 0; padding: 0; border-radius: 50%; font-size: 18px; line-height: 1; display: grid; place-items: center; box-shadow: var(--shadow-sm); position: relative; }
 .notif-btn.active { background: var(--primary-light); border-color: var(--primary); }
 
 .sync { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--text-muted); max-width: 100%; }
@@ -461,6 +461,16 @@ body.dragging { -webkit-user-select: none; user-select: none; }
   font-size: 10.5px; color: var(--text-muted); margin-top: 8px; background: var(--bg-subtle);
   padding: 4px 8px; border-radius: 6px; display: inline-block; width: 100%; text-align: center;
 }
+
+/* Modal Pengaturan Notifikasi Floating */
+.modal-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(2,6,23,0.6); display: none; align-items: center; justify-content: center; padding: 16px; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.modal-overlay.show { display: flex; }
+.modal-card { background: var(--bg-card); width: 100%; max-width: 380px; border-radius: 20px; border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--shadow-lg); animation: scaleIn 0.2s ease; }
+@keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.modal-title { font-size: 16px; font-weight: 800; margin: 0; }
+.modal-close { background: var(--bg-subtle); border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: 800; cursor: pointer; display: grid; place-items: center; }
+.notif-badge-count { position: absolute; top: -2px; right: -2px; background: var(--er-bg); color: #fff; font-size: 9px; font-weight: 800; border-radius: 99px; padding: 1px 4px; min-width: 14px; text-align: center; }
 </style>
 </head>
 <body>
@@ -471,11 +481,38 @@ body.dragging { -webkit-user-select: none; user-select: none; }
       <h1 class="app-title">Rawat Kendaraan</h1>
     </div>
     <div class="header-actions">
-      <button class="notif-btn" id="btnNotif" aria-label="Aktifkan Notifikasi Pengingat" title="Pengingat Notifikasi">🔔</button>
+      <button class="notif-btn" id="btnNotifModal" aria-label="Pengaturan Notifikasi" title="Pengaturan Notifikasi">
+        🔔
+        <span id="notifBtnBadge" class="notif-badge-count" style="display:none;">0</span>
+      </button>
       <button class="theme-btn" id="btnTheme" aria-label="Ganti tema terang/gelap" title="Ganti tema">🌙</button>
     </div>
   </div>
   <div id="v"></div>
+</div>
+
+<!-- Modal Floating Pengaturan Notifikasi -->
+<div id="notifModal" class="modal-overlay" role="dialog" aria-label="Pengaturan Notifikasi">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title">🔔 Pengaturan Pengingat</h3>
+      <button class="modal-close" id="closeNotifModal">✕</button>
+    </div>
+    <div style="font-size: 13px; color: var(--text-muted); line-height: 1.45; margin-bottom: 16px;">
+      Atur izin notifikasi browser untuk mendapatkan pengingat otomatis mengenai jadwal servis komponen dan jatuh tempo pajak kendaraan Anda.
+    </div>
+    <div style="background: var(--bg-subtle); padding: 12px; border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <div style="font-weight: 700; font-size: 13px;">Status Izin</div>
+        <div id="notifStatusText" class="mu" style="margin-top: 2px;">Memeriksa...</div>
+      </div>
+      <span id="notifStatusIndicator" class="b nu">Memeriksa</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <button class="p" id="toggleNotifAction" style="width: 100%;">Aktifkan Notifikasi</button>
+      <button class="btn-outline" id="testNotifBtn" style="width: 100%;">Kirim Contoh Notifikasi</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -1107,6 +1144,40 @@ function countUrgentItems() {
   return cnt;
 }
 
+// Hitung total seluruh kendaraan yang mendesak untuk badge App & Header
+function calcTotalGlobalUrgent() {
+  var total = 0;
+  (R.vehicles || []).forEach(function(v) {
+    withV(v, function() {
+      total += countUrgentItems();
+    });
+  });
+  return total;
+}
+
+function updateAppBadge() {
+  if ('setAppBadge' in navigator) {
+    var total = calcTotalGlobalUrgent();
+    if (total > 0) {
+      navigator.setAppBadge(total).catch(function(){});
+    } else {
+      navigator.clearAppBadge().catch(function(){});
+    }
+  }
+}
+
+function updateHeaderBadge() {
+  var badgeEl = $('#notifBtnBadge');
+  if (!badgeEl) return;
+  var total = calcTotalGlobalUrgent();
+  if (total > 0) {
+    badgeEl.textContent = total;
+    badgeEl.style.display = 'block';
+  } else {
+    badgeEl.style.display = 'none';
+  }
+}
+
 function nav() {
   var on = S && tab != 'home';
   var navEl = $('#nav');
@@ -1693,6 +1764,8 @@ function home() {
 function draw() {
   if (!S && tab != 'home') tab = 'home';
   nav();
+  updateHeaderBadge();
+  updateAppBadge();
   var vEl = $('#v');
   if (vEl) {
     try {
@@ -1703,7 +1776,6 @@ function draw() {
       vEl.innerHTML = '<div class="c alert-box"><b>Terjadi kesalahan tampilan:</b> ' + err.message + '<br><button class="p" onclick="tab=\'home\';S=null;draw();" style="margin-top:8px;">Kembali ke Beranda</button></div>';
     }
   }
-  updateNotifBtnState();
 }
 
 var uid = function() { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); };
@@ -1740,44 +1812,67 @@ function saveComponentDetails(compId) {
 }
 
 // ==========================================
-// FITUR PENGINGAT (WEB NOTIFICATION API)
+// FITUR MODAL PENGATURAN NOTIFIKASI
 // ==========================================
-function updateNotifBtnState() {
-  var btn = $('#btnNotif');
-  if (!btn) return;
+function openNotifModal() {
+  var modal = $('#notifModal');
+  if (!modal) return;
+  updateNotifModalUI();
+  modal.classList.add('show');
+}
+
+function closeNotifModal() {
+  var modal = $('#notifModal');
+  if (modal) modal.classList.remove('show');
+}
+
+function updateNotifModalUI() {
+  var statusText = $('#notifStatusText');
+  var statusIndicator = $('#notifStatusIndicator');
+  var actionBtn = $('#toggleNotifAction');
+  
   if (!("Notification" in window)) {
-    btn.style.display = 'none';
+    if (statusText) statusText.textContent = "Browser tidak mendukung";
+    if (statusIndicator) { statusIndicator.className = 'b er'; statusIndicator.textContent = 'Tidak Didukung'; }
+    if (actionBtn) actionBtn.style.display = 'none';
     return;
   }
-  if (Notification.permission === "granted") {
-    btn.classList.add('active');
-    btn.title = "Pengingat Notifikasi Aktif";
+
+  var perm = Notification.permission;
+  if (perm === "granted") {
+    if (statusText) statusText.textContent = "Aktif (Notifikasi diizinkan)";
+    if (statusIndicator) { statusIndicator.className = 'b ok'; statusIndicator.textContent = 'Aktif'; }
+    if (actionBtn) { actionBtn.textContent = "Matikan Notifikasi"; actionBtn.style.background = 'var(--er-bg)'; }
+  } else if (perm === "denied") {
+    if (statusText) statusText.textContent = "Diblokir oleh pengaturan browser";
+    if (statusIndicator) { statusIndicator.className = 'b er'; statusIndicator.textContent = 'Diblokir'; }
+    if (actionBtn) { actionBtn.textContent = "Cara Mengizinkan"; actionBtn.style.background = 'var(--primary)'; }
   } else {
-    btn.classList.remove('active');
-    btn.title = "Aktifkan Pengingat Notifikasi";
+    if (statusText) statusText.textContent = "Belum diaktifkan";
+    if (statusIndicator) { statusIndicator.className = 'b wa'; statusIndicator.textContent = 'Nonaktif'; }
+    if (actionBtn) { actionBtn.textContent = "Aktifkan Notifikasi"; actionBtn.style.background = 'var(--primary)'; }
   }
 }
 
-function requestNotifPermission() {
-  if (!("Notification" in window)) {
-    alert("Browser Anda tidak mendukung Notifikasi Web.");
-    return;
-  }
-  if (Notification.permission === "granted") {
-    toast('ok', 'Pengingat Aktif', 'Notifikasi browser sudah aktif.');
-    checkAllNotifications();
-  } else if (Notification.permission !== "denied") {
+function handleNotifActionBtn() {
+  if (!("Notification" in window)) return;
+  var perm = Notification.permission;
+  if (perm === "granted") {
+    alert("Untuk menonaktifkan notifikasi, silakan ubah izin situs (klik ikon gembok/pengaturan di samping alamat URL browser Anda) lalu ubah izin Notifikasi menjadi 'Blokir' atau 'Tanya'.");
+  } else if (perm === "denied") {
+    alert("Izin notifikasi diblokir. Silakan buka Pengaturan Browser > Setelan Situs > Notifikasi untuk mengizinkannya kembali.");
+  } else {
     Notification.requestPermission().then(function(permission) {
+      updateNotifModalUI();
+      updateHeaderBadge();
+      updateAppBadge();
       if (permission === "granted") {
-        toast('ok', 'Notifikasi Diaktifkan', 'Anda akan menerima pengingat pajak & servis.');
-        updateNotifBtnState();
+        toast('ok', 'Berhasil', 'Notifikasi berhasil diaktifkan.');
         checkAllNotifications();
       } else {
-        toast('er', 'Izin Ditolak', 'Notifikasi tidak diaktifkan.');
+        toast('er', 'Ditolak', 'Izin notifikasi tidak diberikan.');
       }
     });
-  } else {
-    alert("Izin notifikasi diblokir di browser. Silakan aktifkan lewat Pengaturan Situs di browser Anda.");
   }
 }
 
@@ -1790,15 +1885,17 @@ function sendLocalNotif(title, options) {
 }
 
 function checkAllNotifications() {
+  updateHeaderBadge();
+  updateAppBadge();
+
   if (!("Notification" in window) || Notification.permission !== "granted") return;
   
   var todayStr = today();
   var lastChecked = localStorage.getItem('last_notif_check_date');
-  if (lastChecked === todayStr) return; // Hanya kirim notifikasi 1x sehari saat dibuka
+  if (lastChecked === todayStr) return; 
   
   (R.vehicles || []).forEach(function(v) {
     withV(v, function() {
-      // 1. Cek Pajak
       var p = pj();
       if (!p.paid && p.tgl) {
         if (p.n <= 14 && p.n >= 0) {
@@ -1814,7 +1911,6 @@ function checkAllNotifications() {
         }
       }
 
-      // 2. Cek Komponen
       (v.comps || []).filter(isSet).forEach(function(c) {
         var s = st(c);
         if (s.k === 'er') {
@@ -1836,7 +1932,20 @@ function checkAllNotifications() {
 }
 
 document.addEventListener('click', function(e) {
-  if (e.target.closest && e.target.closest('#btnNotif')) { requestNotifPermission(); return; }
+  if (e.target.closest && e.target.closest('#btnNotifModal')) { openNotifModal(); return; }
+  if (e.target.closest && e.target.closest('#closeNotifModal')) { closeNotifModal(); return; }
+  if (e.target.closest && e.target.closest('#notifModal') && e.target.id === 'notifModal') { closeNotifModal(); return; }
+  if (e.target.closest && e.target.closest('#toggleNotifAction')) { handleNotifActionBtn(); return; }
+  if (e.target.closest && e.target.closest('#testNotifBtn')) {
+    if ("Notification" in window && Notification.permission === "granted") {
+      sendLocalNotif("🛠️ Tes Notifikasi Rawat Kendaraan", { body: "Fitur pengingat berfungsi dengan baik!", icon: "/manifest.json" });
+      toast('ok', 'Terkirim', 'Contoh notifikasi telah dikirim ke perangkat Anda.');
+    } else {
+      alert("Aktifkan izin notifikasi terlebih dahulu.");
+    }
+    return;
+  }
+
   if (e.target.closest && e.target.closest('#logoBtn')) { loadDataFromSheet(true); return; }
   if (e.target.closest && e.target.closest('[data-drag]')) { e.preventDefault(); return; }
   
@@ -2165,7 +2274,7 @@ document.addEventListener('focusout', function() {
 });
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeLb();
+  if (e.key === 'Escape') { closeLb(); closeNotifModal(); }
   if (e.key === 'Enter' && e.target && e.target.id === 'km') { var b = $('#setkm'); if (b) b.click(); }
 });
 
