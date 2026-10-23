@@ -30,9 +30,9 @@ module.exports = async function handler(req, res) {
       ]
     }`;
 
-    // Menggunakan model gemini-1.5-flash yang terbukti stabil dan aktif
+    // Memanggil REST API resmi Google menggunakan model gemini-2.0-flash
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
