@@ -582,10 +582,12 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 var supabaseClient = null;
 try {
-  if (window.supabase) {
+  if (window.supabase && typeof window.supabase.createClient === 'function') {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
-} catch(e) {}
+} catch(e) {
+  console.warn("Supabase gagal dimuat, beralih ke mode lokal.");
+}
 
 var K = 'servisMotor_v1';
 var DEF = [["Oli mesin",2000,6,"Ganti rutin"],["Oli gardan",8000,12,"Matic"],["Filter udara",12000,12,"Bersihkan/ganti"],["Busi",8000,12,""],["Kampas rem depan",15000,18,""],["Kampas rem belakang",20000,24,""],["Minyak rem",20000,24,""],["V-belt",24000,24,"Matic"],["Roller CVT",24000,24,"Matic"],["Rantai & gir set",20000,24,"Non-matic"],["Ban depan",25000,24,""],["Ban belakang",20000,24,""],["Aki",24000,24,""],["Air radiator",24000,12,"Jika ada"],["Kampas kopling",30000,36,""]];
@@ -2482,10 +2484,16 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-draw();
-loadDataFromSheet(false);
+// Pastikan DOM siap sepenuhnya sebelum render awal
+document.addEventListener('DOMContentLoaded', function() {
+  draw();
+  loadDataFromSheet(false);
+});
+// Fallback cadangan jika DOMContentLoaded sudah terlewat
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  draw();
+  loadDataFromSheet(false);
+}
 </script>
 </body>
 </html>
-
-```
