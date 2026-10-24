@@ -143,21 +143,23 @@ details[open] summary { margin-bottom: 6px; }
 /* statistik (juga berfungsi sebagai filter) */
 .sim-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
 .sim-stat { --sc:var(--ok-bg); --sb:rgba(22,163,74,.10);
-  position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left;
-  padding:10px 10px 9px; min-height:0; border-radius:16px; cursor:pointer; overflow:hidden;
-  background:linear-gradient(160deg,var(--sb),transparent 85%), var(--bg-card);
-  border:1.5px solid transparent; box-shadow:var(--shadow-sm); outline:1px solid var(--border-color); outline-offset:-1.5px;
-  transition:transform .12s ease, box-shadow .15s ease; }
-.sim-stat.wa { --sc:var(--wa-bg); --sb:rgba(217,119,6,.12); }
-.sim-stat.er { --sc:var(--er-bg); --sb:rgba(220,38,38,.10); }
+  display:flex; flex-direction:column; align-items:stretch; gap:0; text-align:left;
+  padding:10px 10px 9px; min-height:0; border-radius:16px; cursor:pointer;
+  background:linear-gradient(165deg,var(--sb),transparent 80%), var(--bg-card);
+  border:1.5px solid var(--border-color); box-shadow:var(--shadow-sm); transition:transform .12s ease, box-shadow .15s ease; }
+.sim-stat.wa { --sc:var(--wa-bg); --sb:rgba(217,119,6,.13); }
+.sim-stat.er { --sc:var(--er-bg); --sb:rgba(220,38,38,.11); }
 .sim-stat:active { transform:scale(.97); }
-.sim-stat .ic { width:28px; height:28px; border-radius:9px; display:grid; place-items:center; background:var(--sc); margin-bottom:4px; }
-.sim-stat .ic svg { width:16px; height:16px; stroke:#fff; fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
-.sim-stat b { font-size:24px; font-weight:800; line-height:1; color:var(--text-main); font-variant-numeric:tabular-nums; }
-.sim-stat .lb { font-size:10.5px; font-weight:700; color:var(--text-muted); line-height:1.25; }
-.sim-stat.on { outline:2px solid var(--sc); outline-offset:-2px; box-shadow:0 4px 14px rgba(0,0,0,.10); }
-.sim-stat.on .lb { color:var(--sc); }
-.sim-stat.zero { opacity:.6; }
+.sx-top { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:8px; }
+.sx-ic { width:30px; height:30px; border-radius:10px; display:grid; place-items:center; background:var(--sc); flex:none; }
+.sx-ic svg { width:16px; height:16px; stroke:#fff; fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
+.sx-n { font-size:28px; font-weight:800; line-height:1; color:var(--text-main); font-variant-numeric:tabular-nums; letter-spacing:-1px; }
+.sx-t { font-size:12.5px; font-weight:800; color:var(--text-main); line-height:1.2; }
+.sx-s { margin-top:2px; font-size:10px; font-weight:600; color:var(--text-muted); line-height:1.25; }
+.sim-stat.on { border-color:var(--sc); box-shadow:0 0 0 2px var(--sc), 0 6px 16px rgba(0,0,0,.10); }
+.sim-stat.on .sx-t { color:var(--sc); }
+.sim-stat.zero .sx-n { color:var(--text-muted); }
+.sim-stat.zero { opacity:.75; }
 
 .sim-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
 .sim-count { font-size:12px; font-weight:600; color:var(--text-muted); display:flex; align-items:center; gap:6px; min-width:0; }
@@ -272,7 +274,20 @@ details[open] summary { margin-bottom: 6px; }
 .sim-preview .sim-card { padding:13px 14px; gap:11px; }
 .sim-preview .sim-num { font-size:16px; }
 .sim-submit { min-height:48px; border-radius:14px; font-size:14px; width:100%; box-shadow:0 4px 12px rgba(2,132,199,.28); }
-@media (max-width:380px) { .sim-types { grid-template-columns:repeat(3,1fr); } .sim-num { font-size:15px; letter-spacing:1px; } .sim-seg button span { display:none; } }
+@media (max-width:380px) { .sim-types { grid-template-columns:repeat(3,1fr); } .sim-num { font-size:15px; letter-spacing:1px; } }
+@media (max-width:330px) { .sim-seg button span { display:none; } }
+
+/* ===== Tombol header: ikon garis, gaya senada dengan logo & nav ===== */
+.header-actions { gap:8px; }
+.header-actions .notif-btn, .header-actions .theme-btn { width:42px; height:42px; border-radius:14px; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-main); box-shadow:var(--shadow-sm); font-size:0; transition:transform .12s ease, background .15s ease, border-color .15s ease; }
+.header-actions .notif-btn:active, .header-actions .theme-btn:active { transform:scale(.93); background:var(--bg-subtle); }
+.header-actions .notif-btn { color:var(--primary); }
+.header-actions button svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round; }
+.header-actions .notif-badge-count { top:-6px; right:-6px; min-width:19px; height:19px; padding:0 4px; font-size:10px; line-height:15px; border:2px solid var(--bg-main); box-shadow:none; }
+.modal-title .mt-ic { display:inline-grid; place-items:center; width:28px; height:28px; border-radius:9px; background:var(--primary-light); color:var(--primary); vertical-align:middle; margin-right:8px; }
+.modal-title .mt-ic svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.nav-badge.wa { background:var(--wa-bg); }
+.sim-hint svg { flex:none; width:16px; height:16px; margin-top:1px; stroke:var(--primary); fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
 
 nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
@@ -628,10 +643,10 @@ body.dragging { -webkit-user-select: none; user-select: none; }
     </div>
     <div class="header-actions">
       <button class="notif-btn" id="btnNotifModal" aria-label="Pengaturan Notifikasi" title="Pengaturan Notifikasi">
-        🔔
+        <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/></svg>
         <span id="notifBtnBadge" class="notif-badge-count" style="display:none;">0</span>
       </button>
-      <button class="theme-btn" id="btnTheme" aria-label="Ganti tema terang/gelap" title="Ganti tema">🌙</button>
+      <button class="theme-btn" id="btnTheme" aria-label="Ganti tema terang/gelap" title="Ganti tema"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
     </div>
   </div>
   <div id="v"></div>
@@ -641,7 +656,7 @@ body.dragging { -webkit-user-select: none; user-select: none; }
 <div id="notifModal" class="modal-overlay" role="dialog" aria-label="Pengaturan Notifikasi">
   <div class="modal-card">
     <div class="modal-header">
-      <h3 class="modal-title">🔔 Pengaturan Pengingat</h3>
+      <h3 class="modal-title"><span class="mt-ic"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/></svg></span>Pengaturan Pengingat</h3>
       <button class="modal-close" id="closeNotifModal">✕</button>
     </div>
     <div style="font-size: 13px; color: var(--text-muted); line-height: 1.45; margin-bottom: 16px;">
@@ -665,7 +680,7 @@ body.dragging { -webkit-user-select: none; user-select: none; }
 <div id="modalAddSIM" class="modal-overlay" role="dialog" aria-label="Form SIM">
   <div class="modal-card">
     <div class="modal-header">
-      <h3 class="modal-title" id="simModalTitle">🪪 Tambah SIM Baru</h3>
+      <h3 class="modal-title" id="simModalTitle">Tambah SIM Baru</h3>
       <button type="button" class="modal-close" id="closeSIMModal" aria-label="Tutup">✕</button>
     </div>
     <form id="formSIM" class="sim-form">
@@ -1357,24 +1372,26 @@ function nav() {
   var navEl = $('#nav');
   if (navEl) {
     navEl.style.display = 'flex';
-    var uCount = calcTotalGlobalUrgent();
-    var badgeHtml = uCount > 0 ? '<span class="nav-badge">' + uCount + '</span>' : '';
+    var simA = calcSimAttention();
+    var sBadge = simA.n > 0 ? '<span class="nav-badge' + (simA.er > 0 ? '' : ' wa') + '">' + simA.n + '</span>' : '';
+    var vN = (S && tab != 'home' && tab != 'simlist') ? countUrgentItems() : calcVehicleUrgent();
+    var vBadge = vN > 0 ? '<span class="nav-badge">' + vN + '</span>' : '';
 
     if (!S || tab == 'home' || tab == 'simlist') {
       navEl.innerHTML = [
-        ['home', 'home', 'Kendaraan'],
-        ['simlist', 'sim', 'SIM Saya', badgeHtml]
+        ['home', 'home', 'Kendaraan', vBadge],
+        ['simlist', 'sim', 'SIM Saya', sBadge]
       ].map(function(t) {
         return '<button class="' + (tab == t[0] ? 'on' : '') + '" data-nav="' + t[0] + '">' + ICONS[t[1]] + (t[3] || '') + '<span>' + t[2] + '</span></button>';
       }).join('');
     } else {
       navEl.innerHTML = [
         ['motor', 'home', 'Ringkasan'],
-        ['dash', 'dash', 'Jadwal', badgeHtml],
+        ['dash', 'dash', 'Jadwal', vBadge],
         ['komp', 'komp', 'Komponen'],
         ['svc', 'svc', 'Servis'],
         ['his', 'his', 'Riwayat'],
-        ['simlist', 'sim', 'SIM']
+        ['simlist', 'sim', 'SIM', sBadge]
       ].map(function(t) { 
         return '<button class="' + (tab == t[0] ? 'on' : '') + '" data-nav="' + t[0] + '">' + ICONS[t[1]] + (t[3] || '') + '<span>' + t[2] + '</span></button>'; 
       }).join('');
@@ -2042,14 +2059,15 @@ function renderSIMs() {
   items.forEach(function(it) { cnt[it.st.cls]++; });
   items.sort(function(a, b) { return a.st.diff - b.st.diff; }); // paling mendesak di atas
 
-  function tile(k, label) {
+  function tile(k, label, sub) {
     return '<button type="button" class="sim-stat ' + k + (simFilter === k ? ' on' : '') + (cnt[k] === 0 ? ' zero' : '') + '" data-simfilter="' + k + '" aria-pressed="' + (simFilter === k) + '">' +
-      '<span class="ic">' + SIM_ICON[k] + '</span><b>' + cnt[k] + '</b><span class="lb">' + label + '</span></button>';
+      '<span class="sx-top"><span class="sx-ic">' + SIM_ICON[k] + '</span><b class="sx-n">' + cnt[k] + '</b></span>' +
+      '<span class="sx-t">' + label + '</span><span class="sx-s">' + sub + '</span></button>';
   }
-  var stats = '<div class="sim-stats">' + tile('ok', 'Aktif') + tile('wa', 'Perlu perpanjang') + tile('er', 'Kritis / habis') + '</div>';
+  var stats = '<div class="sim-stats">' + tile('ok', 'Aktif', 'Masa berlaku &gt; 1 tahun') + tile('wa', 'Perpanjang', 'Sisa 2 bln – 1 thn') + tile('er', 'Kritis / Habis', 'Sisa &lt; 2 bln atau lewat') + '</div>';
 
   var shown = items.filter(function(it) { return simFilter === 'all' || it.st.cls === simFilter; });
-  var fname = { ok: 'Aktif', wa: 'Perlu perpanjang', er: 'Kritis / habis' };
+  var fname = { ok: 'Aktif', wa: 'Perpanjang', er: 'Kritis / Habis' };
   var toolbar = '<div class="sim-toolbar"><div class="sim-count">' +
       (simFilter === 'all' ? shown.length + ' SIM' : shown.length + ' SIM · ' + fname[simFilter] + ' <button type="button" data-simfilterreset="1">Semua ✕</button>') +
     '</div><div class="sim-seg" role="group" aria-label="Tampilan daftar">' +
@@ -2090,7 +2108,7 @@ function renderSIMs() {
   }
 
   container.innerHTML = stats + toolbar + body +
-    '<div class="sim-hint"><span>💡</span><span>Status berubah <b>kuning</b> saat sisa masa berlaku &le; 1 tahun dan <b>merah</b> saat &le; 60 hari. Ketuk kartu statistik untuk memfilter daftar.</span></div>';
+    '<div class="sim-hint"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Status berubah <b>kuning</b> saat sisa masa berlaku &le; 1 tahun dan <b>merah</b> saat &le; 60 hari. Ketuk kartu statistik untuk memfilter daftar.</span></div>';
 }
 
 function simListView() {
@@ -2297,7 +2315,7 @@ document.addEventListener('click', function(e) {
   
   if (e.target.id === 'openSIMModalBtn' || e.target.closest('#openSIMModalBtn')) {
     $('#simEditIndex').value = "-1";
-    $('#simModalTitle').textContent = "🪪 Tambah SIM Baru";
+    $('#simModalTitle').textContent = "Tambah SIM Baru";
     $('#simSubmitBtn').textContent = "Simpan Data SIM";
     $('#formSIM').reset();
     $('#modalAddSIM').classList.add('show');
@@ -2322,7 +2340,7 @@ document.addEventListener('click', function(e) {
       $('#simNum').value = simData.num;
       $('#simOwner').value = simData.owner;
       $('#simExpDate').value = simData.expDate;
-      $('#simModalTitle').textContent = "✏️ Edit Data SIM";
+      $('#simModalTitle').textContent = "Edit Data SIM";
       $('#simSubmitBtn').textContent = "Perbarui Data SIM";
       $('#modalAddSIM').classList.add('show');
     }
@@ -2713,7 +2731,7 @@ document.addEventListener('keydown', function(e) {
 $('#btnTheme').addEventListener('click', function() {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  $('#btnTheme').textContent = isDark ? '🌙' : '☀️';
+  $('#btnTheme').innerHTML = themeIconHTML(!isDark);
 });
 
 window.addEventListener('focus', function() {
@@ -2802,6 +2820,27 @@ document.addEventListener('click', function(e) {
     if (open) simOpen[idx] = true; else delete simOpen[idx];
   }
 });
+
+/* ===== v4: badge per tab & ikon tema ===== */
+function calcSimAttention() {
+  var n = 0, er = 0;
+  (R.sims || []).forEach(function(s) {
+    var k = simStatus(s.expDate).cls;
+    if (k === 'er') { n++; er++; } else if (k === 'wa') { n++; }
+  });
+  return { n: n, er: er };
+}
+function calcVehicleUrgent() {
+  var t = 0;
+  (R.vehicles || []).forEach(function(v) { withV(v, function() { t += countUrgentItems(); }); });
+  return t;
+}
+function themeIconHTML(isDarkNow) {
+  return isDarkNow
+    ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+    : '<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>';
+}
+(function() { var b = $('#btnTheme'); if (b) b.innerHTML = themeIconHTML(document.documentElement.getAttribute('data-theme') === 'dark'); })();
 </script>
 </body>
 </html>
