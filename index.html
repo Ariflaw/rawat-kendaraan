@@ -2930,6 +2930,103 @@ setInterval(function() {
   var o = SB();
   if (o.mode === 'ok' && o.at) { var s = document.getElementById('sbS'); if (s) s.textContent = 'Diperbarui ' + sbAgo(o.at); }
 }, 20000);
+
+/* ===== Form kategori kendaraan (catFields / catChange) =====
+   Fungsi ini dipanggil oleh form "Ubah Data Kendaraan" tetapi tidak ada di script asli. */
+function catFields() {
+  if (!S) return '';
+  var i = S.info || {}, mobil = S.jenis == 'mobil', CAT = mobil ? CAT_C : CAT_M;
+  var g = catGuess(S), hasM = i.merek != null && i.merek !== '';
+  var brand = hasM ? i.merek : g.brand;
+  var model = hasM ? (i.model || '') : g.model;
+  var o = function(v, t, sel) { return '<option value="' + E(v) + '"' + (sel ? ' selected' : '') + '>' + E(t) + '</option>'; };
+  var sel = function(key, label, opts) { return '<label>' + label + '<select data-i="' + key + '">' + opts + '</select></label>'; };
+  var map = function(obj, cur, skip) { return Object.keys(obj).filter(function(k) { return k != skip; }).map(function(k) { return o(k, obj[k], cur == k); }).join(''); };
+
+  var h = sel('merek', 'Merek',
+    o('', 'Pilih merek', !brand) + Object.keys(CAT).map(function(b) { return o(b, b, brand == b); }).join('') + o('__m', 'Lainnya (ketik manual)', brand == '__m'));
+
+  var entry = null;
+  if (brand && brand != '__m') {
+    var list = CAT[brand] || [];
+    entry = list.find(function(m) { return m[0] == model; }) || null;
+    h += sel('model', 'Model',
+      o('', 'Pilih model', !model) + list.map(function(m) { return o(m[0], m[0], model == m[0]); }).join('') + o('__m', 'Lainnya (ketik manual)', model == '__m'));
+  }
+  if (brand == '__m' || model == '__m') {
+    h += '<label>Nama kendaraan<input data-i="tipeM" value="' + E(S.motor) + '" placeholder="' + (mobil ? 'Mis. Toyota Avanza 1.5 G' : 'Mis. Honda Vario 125') + '"></label>';
+  }
+
+  if (!mobil) {
+    h += sel('kat', 'Jenis motor', o('', 'Pilih jenis', !i.kat) + map(KAT_M, i.kat));
+    if (i.kat != 'ev') h += sel('cool', 'Sistem pendingin', o('u', 'Pendingin udara', i.cool != 'c') + o('c', 'Pendingin cairan (radiator)', i.cool == 'c'));
+  } else {
+    h += sel('bodi', 'Tipe bodi', o('', 'Pilih tipe bodi', !i.bodi) + map(BODY_C, i.bodi));
+    var allowed = entry && entry[2] ? entry[2].split('') : Object.keys(BBM_C);
+    if (i.bbm && allowed.indexOf(i.bbm) === -1) allowed.push(i.bbm);
+    h += sel('bbm', 'Bahan bakar', o('', 'Pilih bahan bakar', !i.bbm) + allowed.map(function(k) { return o(k, BBM_C[k], i.bbm == k); }).join(''));
+    if (i.bbm != 'e') h += sel('trans', 'Transmisi', o('', 'Pilih transmisi', !i.trans) + map(TRANS_C, i.trans, 'ev'));
+    h += sel('drv', 'Penggerak', o('2', '2WD (2 roda)', i.drv != '4') + o('4', '4WD / AWD', i.drv == '4'));
+  }
+  h += sel('kunci', 'Jenis kunci', o('', 'Kunci biasa', i.kunci != 'keyless') + o('keyless', 'Keyless / smart key', i.kunci == 'keyless'));
+
+  var note = '';
+  if (!catReady(S)) {
+    note = 'Lengkapi jenis ' + (mobil ? 'bahan bakar & transmisi' : 'motor') + ' agar daftar komponen servis menyesuaikan otomatis.';
+  } else {
+    var p = compPlan(S);
+    if (p && !p.fresh && (p.toAdd.length || p.toRemove.length)) {
+      note = 'Daftar komponen belum sesuai jenis kendaraan ini (' + p.toAdd.length + ' perlu ditambah, ' + p.toRemove.length + ' bisa dihapus).' +
+        '<button type="button" class="p" data-synccomp="" style="width:100%; margin-top:6px;">Sesuaikan daftar komponen</button>';
+    }
+  }
+  if (note) h += '<div class="mu" style="flex:1 1 100%; background:var(--bg-subtle); border-radius:12px; padding:10px 12px; line-height:1.5;">' + note + '</div>';
+  return h;
+}
+
+function catChange(k, val) {
+  if (!S) return;
+  var I = S.info = S.info || {}, mobil = S.jenis == 'mobil', CAT = mobil ? CAT_C : CAT_M;
+  var g = catGuess(S), br = (I.merek != null && I.merek !== '') ? I.merek : g.brand;
+
+  if (k == 'merek') {
+    I.merek = val; I.model = val == '__m' ? '__m' : '';
+    if (val && val != '__m') S.motor = val;
+  } else if (k == 'model') {
+    I.merek = br; I.model = val;
+    if (val == '__m') {
+      S.motor = br && br != '__m' ? br : (S.motor || '');
+    } else if (val) {
+      S.motor = br + ' ' + val;
+      var m = (CAT[br] || []).find(function(x) { return x[0] == val; });
+      if (m) {
+        if (!mobil) {
+          I.kat = m[1]; I.cool = m[3] == 'L' ? 'c' : 'u';
+          var cc = +m[2] || 0; I.cc = cc <= 50 ? '50' : cc <= 250 ? '250' : '300';
+        } else {
+          I.bodi = m[1];
+          var al = String(m[2] || '').split('').filter(Boolean);
+          if (al.length && al.indexOf(I.bbm) === -1) I.bbm = al[0];
+          if (I.bbm == 'e') I.trans = 'ev'; else if (I.trans == 'ev') I.trans = '';
+        }
+      }
+    } else {
+      S.motor = br && br != '__m' ? br : S.motor;
+    }
+  } else if (k == 'bbm') {
+    I.bbm = val;
+    if (val == 'e') I.trans = 'ev'; else if (I.trans == 'ev') I.trans = '';
+  } else if (k == 'kat') {
+    I.kat = val; if (val == 'ev') I.cool = '';
+  } else {
+    I[k] = val;
+  }
+
+  if (k == 'kunci') syncKeyless(S);
+  save();
+  autoSync();
+  draw();
+}
 </script>
 </body>
 </html>
