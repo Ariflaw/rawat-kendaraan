@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Rawat Kendaraan & SIM</title>
+<title>Rawat Kendaraan & Status SIM</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2563eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -288,6 +288,35 @@ details[open] summary { margin-bottom: 6px; }
 .modal-title .mt-ic svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
 .nav-badge.wa { background:var(--wa-bg); }
 .sim-hint svg { flex:none; width:16px; height:16px; margin-top:1px; stroke:var(--primary); fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ===== Judul 2 baris & bar status sinkronisasi ===== */
+.app-title span { display:block; }
+.logo { cursor:default; }
+.sdot { display:none !important; }
+.syncbar { --sc:var(--ok-bg); --sb:rgba(22,163,74,.13);
+  display:flex; align-items:center; gap:10px; padding:8px 8px 8px 10px; margin:0 0 12px;
+  border-radius:16px; background:var(--bg-card); border:1px solid var(--border-color); box-shadow:var(--shadow-sm); }
+.syncbar[data-st="busy"] { --sc:var(--primary); --sb:var(--primary-light); }
+.syncbar[data-st="off"] { --sc:var(--wa-bg); --sb:rgba(217,119,6,.15); }
+.syncbar[data-st="er"] { --sc:var(--er-bg); --sb:rgba(220,38,38,.13); }
+.sb-ic { flex:none; width:32px; height:32px; border-radius:11px; display:grid; place-items:center; background:var(--sb); color:var(--sc); }
+.sb-ic svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; }
+.syncbar[data-st="busy"] .sb-ic svg { animation:sbspin 1s linear infinite; }
+@keyframes sbspin { to { transform:rotate(360deg); } }
+.sb-tx { flex:1; min-width:0; line-height:1.25; }
+.sb-tx b { display:block; font-size:12.5px; font-weight:800; color:var(--text-main); }
+.sb-tx span { display:block; font-size:10.5px; font-weight:600; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sb-btn { flex:none; min-height:0; display:inline-flex; align-items:center; gap:6px; padding:9px 13px; border-radius:11px; border:none;
+  font-size:12px; font-weight:800; color:#fff; background:linear-gradient(135deg,var(--primary),var(--primary-hover)); box-shadow:0 3px 8px rgba(2,132,199,.28); }
+.sb-btn svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
+.sb-btn:active { transform:scale(.95); }
+.sb-btn:disabled { opacity:.55; box-shadow:none; }
+.syncbar[data-st="busy"] .sb-btn svg { animation:sbspin 1s linear infinite; }
+.syncbar[data-st="er"] .sb-btn { background:linear-gradient(135deg,#ef4444,var(--er-bg)); box-shadow:0 3px 8px rgba(220,38,38,.28); }
+
+/* ===== Panah masuk kendaraan: ikon SVG terpusat ===== */
+.vgo svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2.8; stroke-linecap:round; stroke-linejoin:round; display:block; }
+.vgo { font-size:0; }
 
 nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
@@ -638,8 +667,8 @@ body.dragging { -webkit-user-select: none; user-select: none; }
 <div class="w">
   <div class="app-header">
     <div class="brand">
-      <div class="logo" id="logoBtn" title="Ketuk untuk perbarui data"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg><span id="sync" class="sdot" role="status"></span></div>
-      <h1 class="app-title">Rawat Kendaraan & SIM</h1>
+      <div class="logo" id="logoBtn"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg><span id="sync" class="sdot" role="status"></span></div>
+      <h1 class="app-title"><span>Rawat Kendaraan</span><span>&amp; Status SIM</span></h1>
     </div>
     <div class="header-actions">
       <button class="notif-btn" id="btnNotifModal" aria-label="Pengaturan Notifikasi" title="Pengaturan Notifikasi">
@@ -648,6 +677,11 @@ body.dragging { -webkit-user-select: none; user-select: none; }
       </button>
       <button class="theme-btn" id="btnTheme" aria-label="Ganti tema terang/gelap" title="Ganti tema"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
     </div>
+  </div>
+  <div class="syncbar" id="syncBar" data-st="busy" role="status" aria-live="polite">
+    <span class="sb-ic" id="sbIc"></span>
+    <div class="sb-tx"><b id="sbT">Memeriksa data…</b><span id="sbS">Mohon tunggu sebentar</span></div>
+    <button type="button" class="sb-btn" id="syncBtn" aria-label="Perbarui data sekarang"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg><span id="sbB">Perbarui</span></button>
   </div>
   <div id="v"></div>
 </div>
@@ -1004,6 +1038,7 @@ var sync = function(m) {
   e.className = 'sdot ' + st0;
   e.title = label;
   if (e.setAttribute) e.setAttribute('aria-label', label);
+  try { if (typeof updateSyncBar === 'function') updateSyncBar(st0, String(m)); } catch (err) {}
 };
 
 function openLb(src) {
@@ -1935,7 +1970,7 @@ function home() {
       return '<div class="c vc ' + (urgent ? 'er' : '') + '" data-pick="' + v.id + '">' +
         '<div class="vph">' + photo + '<span class="plate">' + E(i.plat || 'NO PLAT') + '</span></div>' +
         '<div class="vbody">' +
-          '<div class="vtop"><b class="vname">' + E(v.motor || 'Belum diberi nama') + '</b><span class="vgo">›</span></div>' +
+          '<div class="vtop"><b class="vname">' + E(v.motor || 'Belum diberi nama') + '</b><span class="vgo"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></div>' +
           '<div class="mu vmeta">' + meta + '</div>' + badges +
         '</div></div>';
     }
@@ -1948,7 +1983,7 @@ function home() {
           '<div><span class="plate">' + E(i.plat || 'NO PLAT') + '</span></div>' +
           '<div class="mu">' + meta + '</div>' +
         '</div>' +
-        '<span style="font-size:18px; color:var(--text-muted)">›</span>' +
+        '<span class="vgo"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>' +
       '</div>' + badges + '</div>';
   }); }).join('');
 
@@ -2369,7 +2404,7 @@ document.addEventListener('click', function(e) {
     return;
   }
 
-  if (e.target.closest && e.target.closest('#logoBtn')) { loadDataFromSheet(true); return; }
+  if (e.target.closest && e.target.closest('#syncBtn')) { syncBarAction(); return; }
   if (e.target.closest && e.target.closest('[data-drag]')) { e.preventDefault(); return; }
   
   var btnSaveComp = e.target.closest ? e.target.closest('[data-savecomp]') : null;
@@ -2735,7 +2770,7 @@ $('#btnTheme').addEventListener('click', function() {
 });
 
 window.addEventListener('focus', function() {
-  if (!_busy) loadDataFromSheet(false);
+  if (!_busy && SB().mode !== 'saveerr') loadDataFromSheet(false);
 });
 
 function initApp() {
@@ -2841,6 +2876,60 @@ function themeIconHTML(isDarkNow) {
     : '<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>';
 }
 (function() { var b = $('#btnTheme'); if (b) b.innerHTML = themeIconHTML(document.documentElement.getAttribute('data-theme') === 'dark'); })();
+
+/* ===== v5: bar status sinkronisasi ===== */
+function SB() { return window._sb || (window._sb = { mode: 'busy', at: 0 }); }
+function sbAgo(ms) {
+  var s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+  if (s < 15) return 'baru saja';
+  if (s < 60) return s + ' detik lalu';
+  var m = Math.floor(s / 60); if (m < 60) return m + ' menit lalu';
+  var h = Math.floor(m / 60); if (h < 24) return h + ' jam lalu';
+  return Math.floor(h / 24) + ' hari lalu';
+}
+function updateSyncBar(st, msg) {
+  var bar = document.getElementById('syncBar'); if (!bar) return;
+  var m = String(msg), o = SB(), mode;
+  if (m.indexOf('Offline') > -1 || m.indexOf('Lokal') > -1) mode = 'off';
+  else if (m.indexOf('Gagal') > -1) mode = 'saveerr';
+  else if (st === 'ok') mode = 'ok';
+  else mode = 'busy';
+  if (mode === 'ok') o.at = Date.now();
+  o.mode = mode;
+  var vis = mode === 'saveerr' ? 'er' : mode;
+  var ICONS = {
+    ok:   '<svg viewBox="0 0 24 24"><path d="M22 11.1V12a10 10 0 11-5.9-9.1"/><path d="M22 4L12 14l-3-3"/></svg>',
+    busy: '<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg>',
+    off:  '<svg viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M9.5 5.2A6 6 0 0117.7 9H18a4 4 0 012.5 7.1"/><path d="M5.2 8.3A5 5 0 007 18h10.5"/></svg>',
+    er:   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>'
+  };
+  var t, s, b, dis = false;
+  if (mode === 'ok')        { t = 'Data sudah terbaru'; s = 'Diperbarui ' + sbAgo(o.at); b = 'Perbarui'; }
+  else if (mode === 'busy') { t = m.indexOf('Menyimpan') > -1 ? 'Menyimpan perubahan…' : 'Memperbarui data…'; s = 'Mohon tunggu sebentar'; b = 'Memuat…'; dis = true; }
+  else if (mode === 'off')  { t = 'Mode offline'; s = 'Data hanya tersimpan di perangkat ini'; b = 'Coba lagi'; }
+  else                      { t = 'Perubahan belum tersimpan'; s = 'Gagal mengirim ke server, periksa koneksi'; b = 'Simpan ulang'; }
+  bar.setAttribute('data-st', vis);
+  document.getElementById('sbIc').innerHTML = ICONS[vis];
+  document.getElementById('sbT').textContent = t;
+  document.getElementById('sbS').textContent = s;
+  document.getElementById('sbB').textContent = b;
+  document.getElementById('syncBtn').disabled = dis;
+}
+function syncBarAction() {
+  var o = SB();
+  if (o.mode === 'busy') return;
+  if (o.mode === 'saveerr') { push(); return; }          // jangan timpa perubahan lokal yang belum terkirim
+  if (!supabaseClient) {                                  // tanpa server: beri umpan balik visual singkat
+    updateSyncBar('busy', 'Memperbarui data...');
+    setTimeout(function() { loadDataFromSheet(false); }, 700);
+    return;
+  }
+  loadDataFromSheet(true);
+}
+setInterval(function() {
+  var o = SB();
+  if (o.mode === 'ok' && o.at) { var s = document.getElementById('sbS'); if (s) s.textContent = 'Diperbarui ' + sbAgo(o.at); }
+}, 20000);
 </script>
 </body>
 </html>
