@@ -352,6 +352,19 @@ details[open] summary { margin-bottom: 6px; }
 .set-foot { padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px)); text-align:center; font-size:10.5px; color:var(--text-muted); border-top:1px solid var(--border-color); }
 body.set-open { overflow:hidden; }
 
+/* ===== Bar Selesai (menempel di bawah saat mengubah data kendaraan) ===== */
+.editbar { position:sticky; bottom:calc(72px + env(safe-area-inset-bottom,0px)); z-index:20; display:flex; align-items:center; gap:12px; margin-top:14px; padding:10px 10px 10px 14px;
+  border-radius:18px; background:var(--bg-card); border:1.5px solid var(--border-color); box-shadow:0 8px 24px rgba(0,0,0,.16); transition:border-color .2s ease; }
+.editbar.dirty { border-color:var(--wa-bg); }
+.eb-tx { flex:1; min-width:0; line-height:1.3; }
+.eb-tx b { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:800; }
+.eb-tx b::before { content:""; flex:none; width:8px; height:8px; border-radius:50%; background:var(--primary); }
+.editbar.dirty .eb-tx b::before { background:var(--wa-bg); box-shadow:0 0 0 3px rgba(217,119,6,.22); }
+.eb-tx span { display:block; margin-top:2px; font-size:11px; font-weight:600; color:var(--text-muted); }
+.eb-btn { flex:none; min-height:46px; padding:0 22px; border-radius:14px; font-size:14px; font-weight:800; box-shadow:0 4px 12px rgba(2,132,199,.3); }
+.eb-btn::before { content:""; display:inline-block; width:16px; height:16px; margin-right:8px; vertical-align:-3px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") no-repeat center / contain; }
+
 /* ===== Update KM cepat di kartu kendaraan ===== */
 .kms { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; padding-top:9px; border-top:1px dashed var(--border-color); }
 .kms-t { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; font-size:11.5px; font-weight:600; color:var(--text-muted); }
@@ -414,7 +427,7 @@ body.au-open { overflow:hidden; }
 .acc-tx b { display:block; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .acc-tx span { display:block; margin-top:2px; font-size:11px; color:var(--text-muted); }
 
-.sw-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.sw-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-top:10px; }
 .sw-row b { display:block; font-size:13px; }
 .sw-row span { display:block; margin-top:3px; font-size:11.5px; line-height:1.45; color:var(--text-muted); }
 .sw { flex:none; position:relative; width:46px; height:28px; min-height:0; padding:0; border:none; border-radius:99px; background:var(--border-color); transition:background .2s ease; }
@@ -849,7 +862,7 @@ body.dragging { -webkit-user-select: none; user-select: none; }
       </form>
       <div class="au-links" id="auLinks"></div>
     </div>
-    <div class="au-foot"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg><span>Data Anda terhubung ke akun ini dan tidak bisa dibuka tanpa masuk.</span></div>
+    <div class="au-foot"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg><span>Data kendaraan dan SIM Anda tersimpan di akun ini.</span></div>
   </div>
 </div>
 
@@ -1275,7 +1288,7 @@ try { homeView = localStorage.getItem('servisMotor_view') === 'big' ? 'big' : 'l
 var editIds = null, editNames = null;
 
 var withV = function(v, f) { var k = S; S = v; try { return f(); } finally { S = k; } };
-var _t, _busy = false, _again = false;
+var _t, _busy = false, _again = false, _dirty = false;
 
 var sync = function(m) {
   var e = $('#sync'); if (!e) return;
@@ -1309,11 +1322,30 @@ function toast(kind, title, sub) {
 
 var save = function() {
   try { localStorage.setItem(K, JSON.stringify(R)); } catch(e){}
+  if (editM && tab == 'motor' && S) {            // sedang mengisi form kendaraan: simpan sebagai draf lokal saja
+    _dirty = true;
+    try { localStorage.setItem('draftDirty', '1'); } catch(e){}
+    sync('Draf: menunggu Selesai');
+    if (typeof updateEditBar === 'function') updateEditBar();
+    return;
+  }
+  _dirty = false;
+  try { localStorage.removeItem('draftDirty'); } catch(e){}
   sync('Menyimpan ke Supabase...');
   clearTimeout(_t);
   _t = setTimeout(push, 300);
   checkAllNotifications();
 };
+function flushDraft() {
+  if (!_dirty) return;
+  _dirty = false;
+  try { localStorage.removeItem('draftDirty'); } catch(e){}
+  sync('Menyimpan ke Supabase...');
+  clearTimeout(_t);
+  push();
+  checkAllNotifications();
+  if (typeof updateEditBar === 'function') updateEditBar();
+}
 
 function push() {
   if (!supabaseClient) { sync('Tersimpan di Lokal'); return; }
@@ -1343,6 +1375,9 @@ function push() {
 function loadDataFromSheet(showToast) {
   if (!supabaseClient) { sync('Mode Offline (Lokal)'); return; }
   if (!AU().uid) { if (AU().local) { sync('Mode Offline (Lokal)'); } else { showAuth(AU().mode === 'boot' ? 'boot' : 'login'); } return; }
+  if (_dirty) { sync('Draf: menunggu Selesai'); return; }
+  var _pend = null; try { _pend = localStorage.getItem('draftDirty'); } catch(e){}
+  if (_pend === '1') { try { localStorage.removeItem('draftDirty'); } catch(e){} sync('Menyimpan ke Supabase...'); push(); return; }
   sync('Memperbarui data...');
   
   supabaseClient
@@ -1804,7 +1839,7 @@ function summ() {
 function motor() {
   if (!S) return '';
   var h = motor0();
-  return editM ? h + '<button data-delv="1" style="width:100%; margin-top:8px; color:var(--er-bg); border-color:var(--er-bg);">Hapus Kendaraan Ini</button>' : h;
+  return editM ? h + '<button data-delv="1" style="width:100%; margin-top:8px; color:var(--er-bg); border-color:var(--er-bg);">Hapus Kendaraan Ini</button>' + editBarHTML() : h;
 }
 
 function motor0() {
@@ -1813,7 +1848,7 @@ function motor0() {
   if (!editM) return summ() + '<button class="p" id="edm" style="width:100%; margin-top:4px;">✏️ Ubah Data Kendaraan</button>';
 
   return '<div class="c">' +
-    '<div class="row"><b>Ubah Data Kendaraan</b><button class="p" id="edm" style="padding:4px 12px; min-height:32px;">Selesai</button></div>' +
+    '<div class="row"><b>Ubah Data Kendaraan</b></div>' +
     '<div class="r" style="margin-top:6px;">' +
       '<label>KM berjalan saat ini<input class="rp" type="text" inputmode="numeric" data-kmv="1" value="' + fn(S.km) + '"></label>' +
       '<label>Foto Kendaraan<input id="pf" type="file" accept="image/*"></label>' +
@@ -2415,6 +2450,7 @@ function simListView() {
 }
 
 function draw() {
+  if (_dirty && !(editM && tab == 'motor' && S)) flushDraft();
   if (!S && tab != 'home' && tab != 'simlist') tab = 'home';
   nav();
   updateHeaderBadge();
@@ -2907,7 +2943,7 @@ document.addEventListener('change', function(e) {
     };
     fr.readAsDataURL(t.files[0]);
   }
-  else if (t.dataset.i) {
+  else if (t.dataset.i && S) {
     S.info = S.info || {};
     S.info[t.dataset.i] = ['rangka', 'mesin'].indexOf(t.dataset.i) !== -1 ? t.value.toUpperCase() : (['hargaBeli', 'pajak', 'bStnk', 'bTnkb', 'bSw', 'bLain'].indexOf(t.dataset.i) !== -1 ? String(pn(t.value)) : t.value);
     save();
@@ -3107,11 +3143,12 @@ function updateSyncBar(st, msg) {
   var m = String(msg), o = SB(), mode;
   if (m.indexOf('Offline') > -1 || m.indexOf('Lokal') > -1) mode = 'off';
   else if (m.indexOf('Gagal') > -1) mode = 'saveerr';
+  else if (m.indexOf('Draf:') > -1) mode = 'draft';
   else if (st === 'ok') mode = 'ok';
   else mode = 'busy';
   if (mode === 'ok') o.at = Date.now();
   o.mode = mode;
-  var vis = mode === 'saveerr' ? 'er' : mode;
+  var vis = mode === 'saveerr' ? 'er' : (mode === 'draft' ? 'off' : mode);
   var ICONS = {
     ok:   '<svg viewBox="0 0 24 24"><path d="M22 11.1V12a10 10 0 11-5.9-9.1"/><path d="M22 4L12 14l-3-3"/></svg>',
     busy: '<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg>',
@@ -3122,6 +3159,7 @@ function updateSyncBar(st, msg) {
   if (mode === 'ok')        { t = 'Data sudah terbaru'; s = 'Diperbarui ' + sbAgo(o.at); b = 'Perbarui'; }
   else if (mode === 'busy') { t = m.indexOf('Menyimpan') > -1 ? 'Menyimpan perubahan…' : 'Memperbarui data…'; s = 'Mohon tunggu sebentar'; b = 'Memuat…'; dis = true; }
   else if (mode === 'off')  { t = 'Mode offline'; s = 'Data hanya tersimpan di perangkat ini'; b = 'Coba lagi'; }
+  else if (mode === 'draft') { t = 'Sedang mengubah data'; s = 'Akan disimpan saat Anda menekan Selesai'; b = 'Simpan sekarang'; }
   else                      { t = 'Perubahan belum tersimpan'; s = 'Gagal mengirim ke server, periksa koneksi'; b = 'Simpan ulang'; }
   bar.setAttribute('data-st', vis);
   document.getElementById('sbIc').innerHTML = ICONS[vis];
@@ -3139,6 +3177,7 @@ function syncBarAction() {
   var o = SB();
   if (o.mode === 'busy') return;
   o.manual = true;
+  if (o.mode === 'draft') { flushDraft(); return; }
   if (o.mode === 'saveerr') { push(); return; }          // jangan timpa perubahan lokal yang belum terkirim
   if (!supabaseClient) {                                  // tanpa server: beri umpan balik visual singkat
     updateSyncBar('busy', 'Memperbarui data...');
@@ -3500,8 +3539,8 @@ function hideAuth() {
   document.body.classList.remove('au-open'); AU().mode = '';
 }
 function wipeLocal() {
-  clearTimeout(_t); _busy = false; _again = false;
-  try { localStorage.removeItem(K); } catch (e) {}
+  clearTimeout(_t); _busy = false; _again = false; _dirty = false;
+  try { localStorage.removeItem(K); localStorage.removeItem('draftDirty'); } catch (e) {}
   R = { vehicles: [], sims: [] }; S = null; tab = 'home';
 }
 function onSession(session) {
@@ -3601,6 +3640,22 @@ document.addEventListener('click', function(e) {
   }
 });
 document.addEventListener('submit', function(e) { if (e.target && e.target.id === 'auForm') { e.preventDefault(); authSubmit(); } });
+
+/* ===== v11: simpan saat Selesai, bar Selesai ===== */
+function editBarHTML() {
+  var d = _dirty;
+  return '<div class="editbar' + (d ? ' dirty' : '') + '" id="editBar"><div class="eb-tx"><b id="ebT">' + (d ? 'Ada perubahan' : 'Mode ubah data') + '</b>' +
+    '<span id="ebS">' + (d ? 'Belum disimpan. Ketuk Selesai untuk menyimpan.' : 'Perubahan disimpan saat Anda menekan Selesai.') + '</span></div>' +
+    '<button type="button" class="p eb-btn" id="edm">Selesai</button></div>';
+}
+function updateEditBar() {
+  var b = document.getElementById('editBar'); if (!b) return;
+  b.classList.toggle('dirty', _dirty);
+  document.getElementById('ebT').textContent = _dirty ? 'Ada perubahan' : 'Mode ubah data';
+  document.getElementById('ebS').textContent = _dirty ? 'Belum disimpan. Ketuk Selesai untuk menyimpan.' : 'Perubahan disimpan saat Anda menekan Selesai.';
+}
+document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'hidden' && _dirty) flushDraft(); });
+window.addEventListener('pagehide', function() { if (_dirty) flushDraft(); });
 </script>
 </body>
 </html>
