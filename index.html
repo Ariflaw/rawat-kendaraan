@@ -352,6 +352,37 @@ details[open] summary { margin-bottom: 6px; }
 .set-foot { padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px)); text-align:center; font-size:10.5px; color:var(--text-muted); border-top:1px solid var(--border-color); }
 body.set-open { overflow:hidden; }
 
+/* ===== Data & Cadangan (di Pengaturan) ===== */
+.ds-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+.ds-stat { background:var(--bg-subtle); border-radius:12px; padding:9px 6px; text-align:center; }
+.ds-stat b { display:block; font-size:19px; font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums; }
+.ds-stat span { display:block; margin-top:2px; font-size:10px; font-weight:700; color:var(--text-muted); }
+.ds-last { display:flex; align-items:center; gap:8px; margin-bottom:12px; padding:9px 11px; border-radius:12px; font-size:11.5px; font-weight:700; color:var(--text-muted); background:var(--bg-subtle); }
+.ds-last svg { flex:none; width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; }
+.ds-last.warn { color:var(--wa-bg); background:rgba(217,119,6,.12); }
+.ds-last.ok { color:var(--ok-bg); background:rgba(22,163,74,.11); }
+.ds-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; border-radius:12px; font-size:13px; }
+.ds-btn svg { width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; }
+.ds-note { margin-top:9px; font-size:10.5px; line-height:1.45; color:var(--text-muted); text-align:center; }
+
+/* dialog konfirmasi import */
+#importModal { z-index:700; }
+#importModal .modal-card { max-width:400px; max-height:calc(100dvh - 32px); overflow-y:auto; }
+.im-p { margin:0 0 4px; font-size:12.5px; line-height:1.5; color:var(--text-muted); word-break:break-word; }
+.im-cmp { width:100%; border-collapse:collapse; margin:10px 0 12px; font-size:12.5px; }
+.im-cmp th { padding:6px 8px; font-size:10.5px; font-weight:800; color:var(--text-muted); text-align:right; }
+.im-cmp th:first-child, .im-cmp td:first-child { text-align:left; }
+.im-cmp td { padding:9px 8px; border-top:1px solid var(--border-color); text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
+.im-cmp td:first-child { color:var(--text-muted); font-weight:600; }
+.im-cmp th:last-child, .im-cmp td:last-child { color:var(--primary); font-weight:800; }
+.im-warn { display:flex; gap:9px; align-items:flex-start; padding:10px 12px; border-radius:12px; font-size:12px; line-height:1.5; background:rgba(220,38,38,.10); color:var(--text-main); }
+.im-warn svg { flex:none; width:17px; height:17px; margin-top:1px; stroke:var(--er-bg); fill:none; stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; }
+.im-link { display:block; margin:10px auto 0; min-height:0; padding:6px 10px; border:none; background:none; color:var(--primary); font-size:12px; font-weight:800; text-decoration:underline; text-underline-offset:3px; }
+.im-actions { display:grid; grid-template-columns:1fr 1.4fr; gap:8px; margin-top:14px; }
+.im-actions.one { grid-template-columns:1fr; }
+.im-actions button { min-height:44px; border-radius:12px; font-size:13px; }
+.im-danger { background:linear-gradient(135deg,#ef4444,var(--er-bg)) !important; color:#fff; border:none; box-shadow:0 3px 8px rgba(220,38,38,.28); }
+
 /* ===== Badge menu bawah: menempel di ikon ===== */
 .nav-ic { position:relative; display:inline-flex; transition:transform .12s ease; }
 nav button.on svg { transform:none; }
@@ -765,9 +796,37 @@ body.dragging { -webkit-user-select: none; user-select: none; }
         <button class="btn-outline" id="testNotifBtn" style="width: 100%;">Kirim Contoh Notifikasi</button>
       </div>
     </section>
+    <section class="set-sec" id="dataSec">
+      <h4>Data &amp; Cadangan</h4>
+      <p>Satu file JSON berisi semua kendaraan, riwayat servis, dan data SIM Anda. Simpan file ini untuk berjaga-jaga atau pindah perangkat.</p>
+      <div class="ds-stats">
+        <div class="ds-stat"><b id="dsV">0</b><span>Kendaraan</span></div>
+        <div class="ds-stat"><b id="dsH">0</b><span>Riwayat</span></div>
+        <div class="ds-stat"><b id="dsS">0</b><span>SIM</span></div>
+      </div>
+      <div class="ds-last" id="dsLast"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Belum pernah diexport</span></div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" class="p ds-btn" id="exportBtn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Export Data</button>
+        <button type="button" class="btn-outline ds-btn" id="importBtn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>Import Data</button>
+        <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+      </div>
+      <div class="ds-note">Import akan mengganti seluruh data saat ini. Anda akan diminta konfirmasi dulu.</div>
+    </section>
   </div>
   <div class="set-foot">Rawat Kendaraan &amp; Status SIM</div>
 </aside>
+
+<!-- Dialog konfirmasi Import -->
+<div id="importModal" class="modal-overlay" role="dialog" aria-label="Import data">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title"><span class="mt-ic"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span><span id="imTitle">Pulihkan dari cadangan?</span></h3>
+      <button type="button" class="modal-close" id="imClose" aria-label="Tutup">✕</button>
+    </div>
+    <div id="imBody"></div>
+    <div class="im-actions" id="imActions"></div>
+  </div>
+</div>
 
 <!-- Modal Tambah / Edit SIM -->
 <div id="modalAddSIM" class="modal-overlay" role="dialog" aria-label="Form SIM">
@@ -1931,14 +1990,6 @@ function his() {
     '<div class="seg txt wide" style="margin-bottom:10px;"><button data-hv="list" class="' + (hisView == 'list' ? 'on' : '') + '">Riwayat</button><button data-hv="stat" class="' + (hisView == 'stat' ? 'on' : '') + '">Statistik</button></div>' +
     ((S.hist || []).length ? '<div class="chips"><button class="chip ' + (hisYear == 'all' ? 'on' : '') + '" data-hy="all">Semua</button>' + years.map(function(y) { return '<button class="chip ' + (hisYear == y ? 'on' : '') + '" data-hy="' + y + '">' + y + '</button>'; }).join('') + '</div>' : '') +
     (hisView == 'list' && (S.hist || []).length ? '<div class="row sortrow"><span class="mu">Urutkan</span><div class="seg txt"><button data-hs="new" class="' + (hisSort == 'new' ? 'on' : '') + '">Terbaru</button><button data-hs="old" class="' + (hisSort == 'old' ? 'on' : '') + '">Terlama</button><button data-hs="price" class="' + (hisSort == 'price' ? 'on' : '') + '">Termahal</button></div></div>' : '') +
-  '</div>' +
-  '<div class="c" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px;">' +
-    '<div><div style="font-size:12px; font-weight:700;">Cadangan Data (JSON)</div><div class="mu">Simpan atau pulihkan data kendaraan</div></div>' +
-    '<div style="display:flex; gap:6px;">' +
-      '<button class="btn-outline" id="exportBtn" style="padding:4px 10px; min-height:32px; font-size:11.5px;">📤 Export</button>' +
-      '<button class="btn-outline" id="importBtn" style="padding:4px 10px; min-height:32px; font-size:11.5px;">📥 Import</button>' +
-      '<input type="file" id="importFile" accept=".json" style="display:none">' +
-    '</div>' +
   '</div>';
 
   if (hisView == 'stat') return dl + toolbar + hisStat(H, years);
@@ -2471,23 +2522,6 @@ document.addEventListener('click', function(e) {
     return;
   }
 
-  if (e.target.id === 'exportBtn') {
-    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(R, null, 2));
-    var dlAnchor = document.createElement('a');
-    dlAnchor.setAttribute("href", dataStr);
-    dlAnchor.setAttribute("download", "rawat_kendaraan_backup_" + today() + ".json");
-    document.body.appendChild(dlAnchor);
-    dlAnchor.click();
-    dlAnchor.remove();
-    toast('ok', 'Export Berhasil', 'File cadangan berhasil diunduh.');
-    return;
-  }
-  if (e.target.id === 'importBtn') {
-    var fileInp = $('#importFile');
-    if (fileInp) fileInp.click();
-    return;
-  }
-
   var zm = e.target.closest ? e.target.closest('[data-zoom]') : null;
   if (zm) { openLb(zm.getAttribute('src')); return; }
   if (e.target.closest && e.target.closest('#lb')) { closeLb(); return; }
@@ -2664,30 +2698,6 @@ document.addEventListener('input', function(e) {
 document.addEventListener('change', function(e) {
   var t = e.target;
   
-  if (t.id === 'importFile' && t.files[0]) {
-    var reader = new FileReader();
-    reader.onload = function(evt) {
-      try {
-        var parsed = JSON.parse(evt.target.result);
-        if (parsed && Array.isArray(parsed.vehicles)) {
-          R = parsed;
-          norm();
-          save();
-          S = R.vehicles[0] || null;
-          draw();
-          toast('ok', 'Import Berhasil', 'Data berhasil dipulihkan.');
-        } else {
-          alert('Format file JSON tidak valid.');
-        }
-      } catch(err) {
-        alert('Gagal membaca file JSON: ' + err.message);
-      }
-      t.value = '';
-    };
-    reader.readAsText(t.files[0]);
-    return;
-  }
-
   var tr = t.closest ? t.closest('[data-id]') : null;
   if (t.dataset.hi) { 
     var h = (S.hist||[]).find(function(x) { return x.id == t.dataset.hi; }), f = t.dataset.hf; 
@@ -3116,7 +3126,7 @@ function closeSyncPop() {
   if (p) p.classList.remove('open'); if (b) b.setAttribute('aria-expanded', 'false');
 }
 function openSettings() {
-  closeSyncPop(); updateNotifModalUI(); markThemeOpts();
+  closeSyncPop(); updateNotifModalUI(); markThemeOpts(); refreshDataSection();
   document.getElementById('setOverlay').classList.add('show');
   var d = document.getElementById('setDrawer'); d.classList.add('open'); d.setAttribute('aria-hidden', 'false');
   document.body.classList.add('set-open');
@@ -3138,6 +3148,95 @@ document.addEventListener('click', function(e) {
 });
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeSyncPop(); closeSettings(); } });
 window.addEventListener('resize', closeSyncPop);
+
+/* ===== v8: Export / Import di Pengaturan ===== */
+var WARN_SVG = '<svg viewBox="0 0 24 24"><path d="M12 8v5"/><path d="M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>';
+function dataSummary(d) {
+  var v = (d && Array.isArray(d.vehicles)) ? d.vehicles : [], h = 0;
+  v.forEach(function(x) { h += Array.isArray(x && x.hist) ? x.hist.length : 0; });
+  return { v: v.length, h: h, s: (d && Array.isArray(d.sims)) ? d.sims.length : 0 };
+}
+function refreshDataSection() {
+  var s = dataSummary(R);
+  document.getElementById('dsV').textContent = s.v;
+  document.getElementById('dsH').textContent = s.h;
+  document.getElementById('dsS').textContent = s.s;
+  var box = document.getElementById('dsLast'), txt = box.querySelector('span'), at = 0;
+  try { at = +localStorage.getItem('lastBackupAt') || 0; } catch (e) {}
+  if (!at) { box.className = 'ds-last warn'; txt.textContent = 'Belum pernah diexport. Sebaiknya buat cadangan.'; }
+  else if (Date.now() - at > 30 * 86400000) { box.className = 'ds-last warn'; txt.textContent = 'Terakhir diexport ' + sbAgo(at) + '. Sudah lama, cadangkan lagi.'; }
+  else { box.className = 'ds-last ok'; txt.textContent = 'Terakhir diexport ' + sbAgo(at); }
+}
+function doExport() {
+  var out = JSON.parse(JSON.stringify(R));
+  out._backup = { app: 'rawat-kendaraan-status-sim', at: new Date().toISOString() };
+  var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'rawat_kendaraan_backup_' + today() + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function() { URL.revokeObjectURL(url); }, 2000);
+  try { localStorage.setItem('lastBackupAt', String(Date.now())); } catch (e) {}
+  refreshDataSection();
+  var s = dataSummary(R);
+  toast('ok', 'Export Berhasil', s.v + ' kendaraan, ' + s.h + ' riwayat, ' + s.s + ' SIM tersimpan ke file.');
+}
+var _pendingImport = null;
+function openImportModal(title, bodyHTML, actionsHTML, one) {
+  document.getElementById('imTitle').textContent = title;
+  document.getElementById('imBody').innerHTML = bodyHTML;
+  var act = document.getElementById('imActions'); act.innerHTML = actionsHTML; act.className = 'im-actions' + (one ? ' one' : '');
+  document.getElementById('importModal').classList.add('show');
+}
+function closeImportModal() { document.getElementById('importModal').classList.remove('show'); _pendingImport = null; }
+function handleImportFile(file) {
+  var reader = new FileReader();
+  reader.onerror = function() { openImportModal('File tidak bisa dibaca', '<p class="im-p">Terjadi kesalahan saat membuka file. Coba pilih file lagi.</p>', '<button type="button" class="p" id="imClose2">Tutup</button>', true); };
+  reader.onload = function(evt) {
+    var parsed = null;
+    try { parsed = JSON.parse(evt.target.result); } catch (err) {}
+    if (!parsed || !Array.isArray(parsed.vehicles)) {
+      openImportModal('File tidak valid',
+        '<p class="im-p">File <b>' + E(file.name) + '</b> bukan file cadangan Rawat Kendaraan. Gunakan file .json hasil Export dari aplikasi ini.</p>',
+        '<button type="button" class="p" id="imClose2">Tutup</button>', true);
+      return;
+    }
+    _pendingImport = parsed;
+    var cur = dataSummary(R), inc = dataSummary(parsed), when = '';
+    if (parsed._backup && parsed._backup.at) { try { when = ' · dibuat ' + dt(String(parsed._backup.at).slice(0, 10)); } catch (e) {} }
+    openImportModal('Ganti semua data?',
+      '<p class="im-p">File: <b>' + E(file.name) + '</b>' + E(when) + '</p>' +
+      '<table class="im-cmp"><tr><th></th><th>Data saat ini</th><th>Isi file</th></tr>' +
+        '<tr><td>Kendaraan</td><td>' + cur.v + '</td><td>' + inc.v + '</td></tr>' +
+        '<tr><td>Riwayat servis</td><td>' + cur.h + '</td><td>' + inc.h + '</td></tr>' +
+        '<tr><td>SIM</td><td>' + cur.s + '</td><td>' + inc.s + '</td></tr></table>' +
+      '<div class="im-warn">' + WARN_SVG + '<span>Data saat ini akan <b>diganti</b> dengan isi file dan ikut disinkronkan ke server. Tindakan ini tidak bisa dibatalkan.</span></div>' +
+      '<button type="button" class="im-link" id="imBackupFirst">Export data saat ini dulu</button>',
+      '<button type="button" class="btn-outline" id="imClose2">Batal</button><button type="button" class="im-danger" id="imConfirm">Ya, ganti data</button>', false);
+  };
+  reader.readAsText(file);
+}
+function confirmImport() {
+  var parsed = _pendingImport; if (!parsed) return;
+  delete parsed._backup;
+  R = parsed; norm(); save();
+  S = null; tab = 'home';
+  closeImportModal(); closeSettings(); draw();
+  var s = dataSummary(R);
+  toast('ok', 'Import Berhasil', s.v + ' kendaraan, ' + s.h + ' riwayat, ' + s.s + ' SIM dipulihkan.');
+}
+document.addEventListener('click', function(e) {
+  var t = e.target; if (!t || !t.closest) return;
+  if (t.closest('#exportBtn')) { doExport(); return; }
+  if (t.closest('#importBtn')) { var f = document.getElementById('importFile'); if (f) f.click(); return; }
+  if (t.closest('#imBackupFirst')) { doExport(); return; }
+  if (t.closest('#imConfirm')) { confirmImport(); return; }
+  if (t.closest('#imClose') || t.closest('#imClose2') || t.id === 'importModal') { closeImportModal(); return; }
+});
+document.addEventListener('change', function(e) {
+  var t = e.target;
+  if (t && t.id === 'importFile' && t.files && t.files[0]) { handleImportFile(t.files[0]); t.value = ''; }
+});
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeImportModal(); });
 </script>
 </body>
 </html>
