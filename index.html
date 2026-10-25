@@ -378,6 +378,57 @@ body.set-open { overflow:hidden; }
 .km-note.warn { background:rgba(217,119,6,.14); color:var(--wa-bg); }
 .km-note[hidden] { display:none; }
 
+/* ===== Login, akun & privasi ===== */
+.au { position:fixed; inset:0; z-index:800; background:var(--bg-main); overflow-y:auto; display:flex; align-items:center; justify-content:center; padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px)); }
+.au[hidden] { display:none; }
+.au-box { width:100%; max-width:380px; }
+.au-logo { width:64px; height:64px; border-radius:20px; display:grid; place-items:center; margin:0 auto 14px; background:linear-gradient(135deg,var(--primary),var(--primary-hover)); box-shadow:0 8px 20px rgba(2,132,199,.3); }
+.au-logo svg { width:32px; height:32px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.au-title { margin:0; text-align:center; font-size:22px; line-height:1.2; font-weight:800; letter-spacing:-.4px; }
+.au-sub { margin:10px 0 18px; text-align:center; font-size:13px; line-height:1.5; color:var(--text-muted); }
+.au-spin { display:none; width:28px; height:28px; margin:22px auto 0; border:3px solid var(--border-color); border-top-color:var(--primary); border-radius:50%; animation:sbspin .8s linear infinite; }
+.au.boot .au-spin { display:block; }
+.au.boot .au-main { display:none; }
+.au-f { display:block; margin-bottom:12px; }
+.au-f > span { display:block; margin-bottom:6px; font-size:11.5px; font-weight:700; color:var(--text-muted); }
+.au-f input { width:100%; min-height:48px; padding:0 14px; border-radius:13px; font-size:15px; }
+.au-pw { position:relative; }
+.au-pw input { padding-right:48px; }
+.au-pw button { position:absolute; right:5px; top:50%; transform:translateY(-50%); width:38px; height:38px; min-height:0; padding:0; border:none; background:none; color:var(--text-muted); display:grid; place-items:center; }
+.au-pw button svg { width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round; }
+.au-msg { margin-bottom:12px; padding:10px 12px; border-radius:12px; font-size:12.5px; line-height:1.5; font-weight:600; }
+.au-msg[hidden] { display:none; }
+.au-msg.err { background:rgba(220,38,38,.11); color:var(--er-bg); }
+.au-msg.info { background:rgba(22,163,74,.12); color:var(--ok-bg); }
+.au-submit { width:100%; min-height:50px; border-radius:14px; font-size:15px; box-shadow:0 4px 12px rgba(2,132,199,.28); }
+.au-submit:disabled { opacity:.6; }
+.au-links { display:flex; flex-direction:column; align-items:center; gap:2px; margin-top:12px; }
+.au-links button { min-height:0; padding:8px 10px; border:none; background:none; color:var(--primary); font-size:13px; font-weight:700; }
+.au-foot { display:flex; align-items:flex-start; justify-content:center; gap:8px; margin-top:22px; font-size:11px; line-height:1.5; color:var(--text-muted); text-align:left; }
+.au-foot svg { flex:none; width:15px; height:15px; margin-top:1px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+body.au-open { overflow:hidden; }
+
+.acc-row { display:flex; align-items:center; gap:12px; margin:8px 0 12px; }
+.acc-av { flex:none; width:42px; height:42px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(135deg,var(--primary),var(--primary-hover)); color:#fff; font-weight:800; font-size:17px; text-transform:uppercase; }
+.acc-tx { min-width:0; }
+.acc-tx b { display:block; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.acc-tx span { display:block; margin-top:2px; font-size:11px; color:var(--text-muted); }
+
+.sw-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.sw-row b { display:block; font-size:13px; }
+.sw-row span { display:block; margin-top:3px; font-size:11.5px; line-height:1.45; color:var(--text-muted); }
+.sw { flex:none; position:relative; width:46px; height:28px; min-height:0; padding:0; border:none; border-radius:99px; background:var(--border-color); transition:background .2s ease; }
+.sw i { position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s ease; }
+.sw.on { background:var(--primary); }
+.sw.on i { transform:translateX(18px); }
+
+.sim-idl { display:flex; align-items:center; gap:8px; }
+.sim-eye { display:inline-grid; place-items:center; width:22px; height:22px; min-height:0; padding:0; border-radius:50%; border:none; background:rgba(255,255,255,.22); color:#fff; }
+.sim-eye svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.sim-eye.lite { display:inline-flex; align-items:center; gap:5px; width:auto; height:auto; padding:5px 10px; border-radius:99px; background:var(--primary-light); color:var(--primary); font-size:11px; font-weight:800; }
+.sim-eye.lite svg { width:13px; height:13px; }
+.sim-row-meta { align-items:center; }
+
 /* ===== Data & Cadangan (di Pengaturan) ===== */
 .ds-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
 .ds-stat { background:var(--bg-subtle); border-radius:12px; padding:9px 6px; text-align:center; }
@@ -780,6 +831,28 @@ body.dragging { -webkit-user-select: none; user-select: none; }
   <div id="v"></div>
 </div>
 
+<!-- Layar masuk (login) -->
+<div id="authScreen" class="au boot" hidden>
+  <div class="au-box">
+    <div class="au-logo"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+    <h1 class="au-title">Rawat Kendaraan<br>&amp; Status SIM</h1>
+    <div class="au-spin" aria-label="Memeriksa sesi"></div>
+    <div class="au-main">
+      <p class="au-sub" id="auSub"></p>
+      <form id="auForm" novalidate>
+        <label class="au-f" id="auEmailF"><span>Email</span><input id="auEmail" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" placeholder="nama@email.com"></label>
+        <label class="au-f" id="auPassF"><span id="auPassL">Kata sandi</span>
+          <div class="au-pw"><input id="auPass" type="password" autocomplete="current-password" placeholder="Kata sandi"><button type="button" id="auEye" aria-label="Tampilkan kata sandi"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        </label>
+        <div class="au-msg" id="auMsg" hidden></div>
+        <button type="submit" class="p au-submit" id="auSubmit">Masuk</button>
+      </form>
+      <div class="au-links" id="auLinks"></div>
+    </div>
+    <div class="au-foot"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg><span>Data Anda terhubung ke akun ini dan tidak bisa dibuka tanpa masuk.</span></div>
+  </div>
+</div>
+
 <!-- Popover status data (ikon reload di header) -->
 <div class="syncpop" id="syncBar" data-st="busy" role="dialog" aria-label="Status data" aria-live="polite">
   <div class="sp-row">
@@ -798,6 +871,11 @@ body.dragging { -webkit-user-select: none; user-select: none; }
     <button type="button" class="modal-close" id="closeSettings" aria-label="Tutup pengaturan">✕</button>
   </div>
   <div class="set-body">
+    <section class="set-sec" id="accSec">
+      <h4>Akun</h4>
+      <div class="acc-row"><span class="acc-av" id="accAv">?</span><div class="acc-tx"><b id="accEmail">—</b><span id="accSt"></span></div></div>
+      <button type="button" class="btn-outline ds-btn" id="signOutBtn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</button>
+    </section>
     <section class="set-sec">
       <h4>Tampilan</h4>
       <p>Pilih tema aplikasi. Pilihan Anda akan diingat.</p>
@@ -805,6 +883,13 @@ body.dragging { -webkit-user-select: none; user-select: none; }
         <button type="button" class="set-theme" data-themepref="light"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span>Terang</span></button>
         <button type="button" class="set-theme" data-themepref="dark"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg><span>Gelap</span></button>
         <button type="button" class="set-theme" data-themepref="auto"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Otomatis</span></button>
+      </div>
+    </section>
+    <section class="set-sec">
+      <h4>Privasi</h4>
+      <div class="sw-row">
+        <div><b>Sembunyikan NIK / nomor SIM</b><span>Nomor tampil sebagian (•••• 3456). Ketuk ikon mata pada kartu SIM untuk melihatnya sebentar.</span></div>
+        <button type="button" class="sw" id="simMaskSw" role="switch" aria-checked="true" aria-label="Sembunyikan NIK dan nomor SIM"><i></i></button>
       </div>
     </section>
     <section class="set-sec">
@@ -1232,12 +1317,13 @@ var save = function() {
 
 function push() {
   if (!supabaseClient) { sync('Tersimpan di Lokal'); return; }
+  if (!AU().uid) { sync('Tersimpan di Lokal'); return; }
   if (_busy) { _again = true; return; }
   _busy = true;
 
   supabaseClient
     .from('app_state')
-    .upsert({ id: 'default_user', data: R, updated_at: new Date().toISOString() })
+    .upsert({ id: AU().uid, data: R, updated_at: new Date().toISOString() })
     .then(function(res) {
       _busy = false;
       if (res.error) throw res.error;
@@ -1256,12 +1342,13 @@ function push() {
 
 function loadDataFromSheet(showToast) {
   if (!supabaseClient) { sync('Mode Offline (Lokal)'); return; }
+  if (!AU().uid) { if (AU().local) { sync('Mode Offline (Lokal)'); } else { showAuth(AU().mode === 'boot' ? 'boot' : 'login'); } return; }
   sync('Memperbarui data...');
   
   supabaseClient
     .from('app_state')
     .select('data')
-    .eq('id', 'default_user')
+    .eq('id', AU().uid)
     .single()
     .then(function(res) {
       if (res.error && res.error.code !== 'PGRST116') throw res.error;
@@ -2163,6 +2250,12 @@ var SIM_INFO = {
 
 var simView = 'full', simFilter = 'all', simOpen = {};
 try { var _sv = localStorage.getItem('simView'); if (_sv === 'compact' || _sv === 'full') simView = _sv; } catch (e) {}
+var simMask = true, simRevealed = {}, _simRevT = {};
+try { if (localStorage.getItem('simMask') === '0') simMask = false; } catch (e) {}
+var SIM_EYE = {
+  on:  '<svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  off: '<svg viewBox="0 0 24 24"><path d="M9.9 4.2A10 10 0 0112 4c6.4 0 10 8 10 8a17 17 0 01-3.2 4.3"/><path d="M6.6 6.6A17 17 0 002 12s3.6 8 10 8a9.7 9.7 0 004.4-1"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/><path d="M2 2l20 20"/></svg>'
+};
 
 function simFmtNum(n) {
   var s = String(n == null ? '' : n).trim();
@@ -2191,15 +2284,27 @@ function simStatus(expStr) {
   return { diff: diff, cls: cls, label: label, short: short, left: left, pct: pct };
 }
 
-function simCardHTML(type, num, owner, expStr, cls) {
+function simMaskNum(n) {
+  var d = String(n == null ? '' : n).replace(/[\s-]/g, '');
+  if (!d) return '';
+  if (d.length <= 4) return '••••';
+  var last = d.slice(-4);
+  if (/^\d{16}$/.test(d)) return '•••• •••• •••• ' + last;
+  return '••••••• ' + last;
+}
+function simShowNum(n, reveal) { return (simMask && !reveal) ? simMaskNum(n) : simFmtNum(n); }
+
+function simCardHTML(type, num, owner, expStr, cls, opt) {
+  opt = opt || {};
   var code = String(type || 'SIM').replace(/^SIM\s*/i, '') || '—';
+  var eye = (opt.idx != null && simMask && num) ? '<button type="button" class="sim-eye" data-simeye="' + opt.idx + '" aria-label="' + (opt.reveal ? 'Sembunyikan nomor' : 'Tampilkan nomor') + '">' + (opt.reveal ? SIM_EYE.off : SIM_EYE.on) + '</button>' : '';
   return '<div class="sim-card ' + cls + '">' +
     '<div class="sim-wm">' + E(code) + '</div>' +
     '<div class="sim-top">' +
       '<div class="sim-title">Surat Izin Mengemudi<small>Driving License · Indonesia</small></div>' +
       '<div class="sim-class">' + E(code) + '</div>' +
     '</div>' +
-    '<div><div class="sim-idl">NIK / Nomor SIM</div><div class="sim-num">' + (E(simFmtNum(num)) || '0000 0000 0000 0000') + '</div></div>' +
+    '<div><div class="sim-idl"><span>NIK / Nomor SIM</span>' + eye + '</div><div class="sim-num">' + (E(simShowNum(num, opt.reveal)) || '0000 0000 0000 0000') + '</div></div>' +
     '<div class="sim-bot">' +
       '<div><div class="sim-lbl">Pemegang</div><div class="sim-val">' + (E(owner) || 'Nama pemilik') + '</div></div>' +
       '<div><div class="sim-lbl">Berlaku s/d</div><div class="sim-val d">' + (expStr ? dt(expStr) : '— — —') + '</div></div>' +
@@ -2276,12 +2381,12 @@ function renderSIMs() {
       return '<div class="sim-row ' + st.cls + (simOpen[idx] ? ' open' : '') + '" data-simrowidx="' + idx + '">' +
         '<div class="sim-row-main">' +
           '<div class="sim-row-badge ' + st.cls + '">' + E(code) + '</div>' +
-          '<div class="sim-row-info"><b>' + E(sim.owner) + '</b><span>' + E(simFmtNum(sim.num)) + '</span></div>' +
+          '<div class="sim-row-info"><b>' + E(sim.owner) + '</b><span>' + E(simShowNum(sim.num, !!simRevealed[idx])) + '</span></div>' +
           '<div class="sim-row-side"><span class="sim-pill sm ' + st.cls + '"><i></i>' + E(st.short) + '</span><small>' + E(st.left) + '</small></div>' +
           SIM_ICON.chev +
         '</div>' +
         '<div class="sim-row-more">' +
-          '<div class="sim-row-meta"><span>' + E(sim.type) + ' · berlaku s/d <b>' + dt(sim.expDate) + '</b></span></div>' +
+          '<div class="sim-row-meta"><span>' + E(sim.type) + ' · berlaku s/d <b>' + dt(sim.expDate) + '</b></span>' + (simMask ? '<button type="button" class="sim-eye lite" data-simeye="' + idx + '">' + (simRevealed[idx] ? SIM_EYE.off + 'Sembunyikan' : SIM_EYE.on + 'Tampilkan') + '</button>' : '') + '</div>' +
           simProgHTML(st) + simActionsHTML(idx) +
         '</div></div>';
     }).join('') + '</div>';
@@ -2289,7 +2394,7 @@ function renderSIMs() {
     body = shown.map(function(it) {
       var sim = it.sim, st = it.st, idx = it.idx;
       return '<div class="sim-wrap ' + st.cls + '">' +
-        simCardHTML(sim.type, sim.num, sim.owner, sim.expDate, st.cls) +
+        simCardHTML(sim.type, sim.num, sim.owner, sim.expDate, st.cls, { idx: idx, reveal: !!simRevealed[idx] }) +
         '<div class="sim-panel">' +
           '<div class="sim-status"><span class="sim-pill ' + st.cls + '"><i></i>' + E(st.label) + '</span>' +
           '<span class="sim-left">' + E(st.left) + '</span></div>' +
@@ -2886,8 +2991,7 @@ window.addEventListener('focus', function() {
 });
 
 function initApp() {
-  draw();
-  loadDataFromSheet(false);
+  authBoot();
 }
 
 if (document.readyState === 'loading') {
@@ -2901,7 +3005,7 @@ function refreshSimPreview() {
   var pv = $('#simPreview'); if (!pv) return;
   var type = $('#simType').value, exp = $('#simExpDate').value;
   var cls = exp ? simStatus(exp).cls : 'ok';
-  pv.innerHTML = simCardHTML(type, $('#simNum').value, $('#simOwner').value, exp, cls === 'nu' ? 'ok' : cls);
+  pv.innerHTML = simCardHTML(type, $('#simNum').value, $('#simOwner').value, exp, cls === 'nu' ? 'ok' : cls, { reveal: true });
   $$('#simTypes .sim-type').forEach(function(b) { b.classList.toggle('on', b.dataset.simtype === type); });
   var d = $('#simTypeDesc'); if (d) d.textContent = SIM_INFO[type] || '';
 }
@@ -2920,7 +3024,7 @@ document.addEventListener('click', function(e) {
   if (cp) {
     var s = (R.sims || [])[parseInt(cp.dataset.copysim, 10)];
     if (s && navigator.clipboard) {
-      navigator.clipboard.writeText(String(s.num)).then(function() { toast('ok', 'Nomor disalin', s.num); }, function() { toast('er', 'Gagal menyalin', 'Izin clipboard ditolak.'); });
+      navigator.clipboard.writeText(String(s.num)).then(function() { toast('ok', 'Nomor disalin', simMask ? simMaskNum(s.num) : s.num); }, function() { toast('er', 'Gagal menyalin', 'Izin clipboard ditolak.'); });
     }
     return;
   }
@@ -3176,7 +3280,7 @@ function closeSyncPop() {
   if (p) p.classList.remove('open'); if (b) b.setAttribute('aria-expanded', 'false');
 }
 function openSettings() {
-  closeSyncPop(); updateNotifModalUI(); markThemeOpts(); refreshDataSection();
+  closeSyncPop(); updateNotifModalUI(); markThemeOpts(); refreshDataSection(); updateAccountUI(); updatePrivacyUI();
   document.getElementById('setOverlay').classList.add('show');
   var d = document.getElementById('setDrawer'); d.classList.add('open'); d.setAttribute('aria-hidden', 'false');
   document.body.classList.add('set-open');
@@ -3335,6 +3439,168 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeKmModal();
   if (e.key === 'Enter' && e.target && e.target.id === 'kmNew') { e.preventDefault(); saveKmModal(); }
 });
+
+/* ===== v10: login, data per akun, privasi NIK ===== */
+function AU() { return window._au || (window._au = { uid: null, email: null, ready: false, mode: '', local: false, busy: false }); }
+function authRedirect() { return location.href.split('#')[0].split('?')[0]; }
+function authErrText(err) {
+  var m = String((err && err.message) || '').toLowerCase();
+  if (m.indexOf('invalid login') > -1) return 'Email atau kata sandi salah.';
+  if (m.indexOf('email not confirmed') > -1) return 'Email belum dikonfirmasi. Cek kotak masuk Anda.';
+  if (m.indexOf('already registered') > -1 || m.indexOf('already been registered') > -1) return 'Email ini sudah terdaftar. Silakan masuk.';
+  if (m.indexOf('signups not allowed') > -1 || m.indexOf('signup is disabled') > -1 || m.indexOf('signups are disabled') > -1) return 'Pendaftaran akun baru sedang ditutup.';
+  if ((err && err.status === 429) || m.indexOf('rate limit') > -1 || m.indexOf('too many') > -1) return 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.';
+  if (m.indexOf('password') > -1 && (m.indexOf('least') > -1 || m.indexOf('weak') > -1 || m.indexOf('short') > -1)) return 'Kata sandi terlalu lemah. Gunakan minimal 8 karakter.';
+  if (m.indexOf('fetch') > -1 || m.indexOf('network') > -1 || !navigator.onLine) return 'Tidak bisa terhubung. Periksa koneksi internet.';
+  return 'Terjadi kesalahan: ' + ((err && err.message) || 'coba lagi.');
+}
+function auMsg(kind, text) {
+  var el = document.getElementById('auMsg'); if (!el) return;
+  if (!text) { el.hidden = true; el.textContent = ''; return; }
+  el.hidden = false; el.className = 'au-msg ' + kind; el.textContent = text;
+}
+function auBusy(b) {
+  AU().busy = b;
+  var btn = document.getElementById('auSubmit'); if (!btn) return;
+  btn.disabled = b;
+  if (b) { btn.setAttribute('data-l', btn.textContent); btn.textContent = 'Memproses…'; }
+  else if (btn.getAttribute('data-l')) { btn.textContent = btn.getAttribute('data-l'); }
+}
+var AU_CFG = {
+  login:    { sub: 'Masuk untuk membuka data kendaraan dan SIM Anda.', btn: 'Masuk', email: true, pass: true, pl: 'Kata sandi', ph: 'Kata sandi', ac: 'current-password',
+              links: [['reset', 'Lupa kata sandi?'], ['signup', 'Belum punya akun? <b>Daftar</b>']] },
+  signup:   { sub: 'Buat akun agar data Anda tersimpan aman dan bisa dibuka di perangkat lain.', btn: 'Daftar', email: true, pass: true, pl: 'Kata sandi', ph: 'Minimal 8 karakter', ac: 'new-password',
+              links: [['login', 'Sudah punya akun? <b>Masuk</b>']] },
+  reset:    { sub: 'Masukkan email akun Anda. Kami akan mengirim tautan untuk membuat kata sandi baru.', btn: 'Kirim tautan reset', email: true, pass: false,
+              links: [['login', 'Kembali ke <b>Masuk</b>']] },
+  recovery: { sub: 'Buat kata sandi baru untuk akun Anda.', btn: 'Simpan kata sandi', email: false, pass: true, pl: 'Kata sandi baru', ph: 'Minimal 8 karakter', ac: 'new-password', links: [] }
+};
+function showAuth(mode) {
+  var el = document.getElementById('authScreen'); if (!el) return;
+  var a = AU();
+  if (!el.hidden && a.mode === mode) return;
+  a.mode = mode; el.hidden = false; document.body.classList.add('au-open');
+  closeSettings(); closeSyncPop();
+  el.classList.toggle('boot', mode === 'boot');
+  var c = AU_CFG[mode]; if (!c) return;
+  document.getElementById('auSub').textContent = c.sub;
+  document.getElementById('auSubmit').textContent = c.btn; document.getElementById('auSubmit').removeAttribute('data-l');
+  document.getElementById('auEmailF').style.display = c.email ? '' : 'none';
+  document.getElementById('auPassF').style.display = c.pass ? '' : 'none';
+  if (c.pass) {
+    document.getElementById('auPassL').textContent = c.pl;
+    var pi = document.getElementById('auPass'); pi.placeholder = c.ph; pi.setAttribute('autocomplete', c.ac); pi.type = 'password'; pi.value = '';
+  }
+  document.getElementById('auLinks').innerHTML = c.links.map(function(l) { return '<button type="button" data-aumode="' + l[0] + '">' + l[1] + '</button>'; }).join('');
+  auMsg('', ''); auBusy(false);
+  setTimeout(function() { var f = document.getElementById(c.email ? 'auEmail' : 'auPass'); if (f && window.innerWidth > 480) f.focus(); }, 60);
+}
+function hideAuth() {
+  var el = document.getElementById('authScreen'); if (el) el.hidden = true;
+  document.body.classList.remove('au-open'); AU().mode = '';
+}
+function wipeLocal() {
+  clearTimeout(_t); _busy = false; _again = false;
+  try { localStorage.removeItem(K); } catch (e) {}
+  R = { vehicles: [], sims: [] }; S = null; tab = 'home';
+}
+function onSession(session) {
+  var a = AU(), u = session && session.user; if (!u) return;
+  if (a.uid === u.id && a.ready) { return; }
+  var owner = null; try { owner = localStorage.getItem('appOwner'); } catch (e) {}
+  if (owner && owner !== u.id) wipeLocal();          // akun berbeda di perangkat yang sama: jangan campur data
+  try { localStorage.setItem('appOwner', u.id); } catch (e) {}
+  a.uid = u.id; a.email = u.email || ''; a.ready = true; a.local = false;
+  hideAuth(); updateAccountUI(); draw(); loadDataFromSheet(false);
+}
+function handleSignedOut() {
+  var a = AU();
+  a.uid = null; a.email = null; a.ready = false; a.local = false;
+  try { localStorage.removeItem('appOwner'); } catch (e) {}
+  wipeLocal(); closeSettings(); closeSyncPop(); closeImportModal(); draw(); updateAccountUI();
+  showAuth('login');
+}
+function authBoot() {
+  if (!supabaseClient) { AU().local = true; draw(); loadDataFromSheet(false); updateAccountUI(); return; }   // pustaka tidak termuat: mode lokal
+  showAuth('boot');
+  supabaseClient.auth.onAuthStateChange(function(ev, session) {
+    setTimeout(function() {
+      if (ev === 'SIGNED_OUT') { handleSignedOut(); return; }
+      if (ev === 'PASSWORD_RECOVERY') { showAuth('recovery'); return; }
+      if (session && (ev === 'SIGNED_IN' || ev === 'INITIAL_SESSION' || ev === 'TOKEN_REFRESHED')) { onSession(session); return; }
+      if (ev === 'INITIAL_SESSION' && !session) {
+        if (!navigator.onLine) { AU().local = true; hideAuth(); draw(); sync('Mode Offline (Lokal)'); updateAccountUI(); }   // tanpa internet: tetap bisa lihat data lokal
+        else showAuth('login');
+      }
+    }, 0);
+  });
+  window.addEventListener('online', function() {
+    var a = AU(); if (!a.local || a.uid) return;
+    supabaseClient.auth.getSession().then(function(r) { if (r.data && r.data.session) { a.local = false; onSession(r.data.session); } else { a.local = false; showAuth('login'); } });
+  });
+}
+function authSubmit() {
+  var a = AU(); if (a.busy || !supabaseClient) return;
+  var mode = a.mode, email = document.getElementById('auEmail').value.trim(), pass = document.getElementById('auPass').value;
+  if (mode !== 'recovery' && !/^\S+@\S+\.\S+$/.test(email)) { auMsg('err', 'Masukkan alamat email yang valid.'); return; }
+  if (mode === 'login' && !pass) { auMsg('err', 'Masukkan kata sandi.'); return; }
+  if ((mode === 'signup' || mode === 'recovery') && pass.length < 8) { auMsg('err', 'Kata sandi minimal 8 karakter.'); return; }
+  auMsg('', ''); auBusy(true);
+  var req;
+  if (mode === 'login') req = supabaseClient.auth.signInWithPassword({ email: email, password: pass });
+  else if (mode === 'signup') req = supabaseClient.auth.signUp({ email: email, password: pass, options: { emailRedirectTo: authRedirect() } });
+  else if (mode === 'reset') req = supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: authRedirect() });
+  else req = supabaseClient.auth.updateUser({ password: pass });
+  req.then(function(res) {
+    auBusy(false);
+    if (res.error) { auMsg('err', authErrText(res.error)); return; }
+    if (mode === 'signup' && !(res.data && res.data.session)) auMsg('info', 'Email konfirmasi sudah dikirim ke ' + email + '. Buka tautannya, lalu masuk di sini.');
+    else if (mode === 'reset') auMsg('info', 'Tautan reset dikirim ke ' + email + '. Cek kotak masuk dan folder spam.');
+    else if (mode === 'recovery') { hideAuth(); toast('ok', 'Kata sandi diperbarui', 'Gunakan kata sandi baru saat masuk berikutnya.'); }
+  }).catch(function(err) { auBusy(false); auMsg('err', authErrText(err)); });
+}
+function updateAccountUI() {
+  var a = AU(), sec = document.getElementById('accSec'); if (!sec) return;
+  var em = document.getElementById('accEmail'), st = document.getElementById('accSt'), av = document.getElementById('accAv'), btn = document.getElementById('signOutBtn');
+  if (a.uid) { em.textContent = a.email || 'Akun'; st.textContent = 'Data tersinkron ke akun ini'; av.textContent = (a.email || '?').charAt(0); btn.style.display = ''; }
+  else { em.textContent = 'Mode lokal'; st.textContent = 'Belum masuk. Data hanya ada di perangkat ini'; av.textContent = '•'; btn.style.display = 'none'; }
+}
+function updatePrivacyUI() {
+  var sw = document.getElementById('simMaskSw'); if (!sw) return;
+  sw.classList.toggle('on', simMask); sw.setAttribute('aria-checked', simMask ? 'true' : 'false');
+}
+function openSignOutConfirm() {
+  var a = AU(), uns = (SB().mode !== 'ok');
+  openImportModal('Keluar dari akun?',
+    '<p class="im-p">Anda akan keluar dari <b>' + E(a.email || 'akun ini') + '</b>. Data tetap aman di server dan dimuat lagi saat Anda masuk. Salinan data di perangkat ini akan dihapus.</p>' +
+    (uns ? '<div class="im-warn" style="margin-top:10px;">' + WARN_SVG + '<span>Ada perubahan yang <b>belum terkirim</b> ke server. Jika keluar sekarang, perubahan itu akan hilang.</span></div><button type="button" class="im-link" id="imBackupFirst">Export data saat ini dulu</button>' : ''),
+    '<button type="button" class="btn-outline" id="imClose2">Batal</button><button type="button" class="im-danger" id="soConfirm">Ya, keluar</button>', false);
+}
+function doSignOut() {
+  closeImportModal();
+  var done = function() { handleSignedOut(); };
+  if (!supabaseClient) { done(); return; }
+  supabaseClient.auth.signOut().then(done, done);
+}
+document.addEventListener('click', function(e) {
+  var t = e.target; if (!t || !t.closest) return;
+  var m = t.closest('[data-aumode]'); if (m) { AU().mode = ''; showAuth(m.getAttribute('data-aumode')); return; }
+  if (t.closest('#auEye')) { var pi = document.getElementById('auPass'); pi.type = pi.type === 'password' ? 'text' : 'password'; return; }
+  if (t.closest('#signOutBtn')) { openSignOutConfirm(); return; }
+  if (t.closest('#soConfirm')) { doSignOut(); return; }
+  if (t.closest('#simMaskSw')) {
+    simMask = !simMask; try { localStorage.setItem('simMask', simMask ? '1' : '0'); } catch (err) {}
+    simRevealed = {}; updatePrivacyUI(); if (document.getElementById('simListContainer')) renderSIMs(); return;
+  }
+  var ey = t.closest('[data-simeye]');
+  if (ey) {
+    var i = ey.getAttribute('data-simeye');
+    if (simRevealed[i]) { delete simRevealed[i]; clearTimeout(_simRevT[i]); }
+    else { simRevealed[i] = true; clearTimeout(_simRevT[i]); _simRevT[i] = setTimeout(function() { delete simRevealed[i]; if (document.getElementById('simListContainer')) renderSIMs(); }, 15000); }
+    renderSIMs(); return;
+  }
+});
+document.addEventListener('submit', function(e) { if (e.target && e.target.id === 'auForm') { e.preventDefault(); authSubmit(); } });
 </script>
 </body>
 </html>
