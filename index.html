@@ -352,6 +352,32 @@ details[open] summary { margin-bottom: 6px; }
 .set-foot { padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px)); text-align:center; font-size:10.5px; color:var(--text-muted); border-top:1px solid var(--border-color); }
 body.set-open { overflow:hidden; }
 
+/* ===== Update KM cepat di kartu kendaraan ===== */
+.kms { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; padding-top:9px; border-top:1px dashed var(--border-color); }
+.kms-t { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; font-size:11.5px; font-weight:600; color:var(--text-muted); }
+.kms-r { display:flex; align-items:center; gap:6px; }
+.kms-t b { font-size:13px; font-weight:800; color:var(--text-main); font-variant-numeric:tabular-nums; }
+.kms-ic { display:inline-grid; place-items:center; color:var(--text-muted); }
+.kms-ic svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.kms.stale .kms-s, .kms.stale .kms-ic, .kms-warn { color:var(--wa-bg); font-weight:800; }
+.qkm { flex:none; display:inline-flex; align-items:center; gap:5px; min-height:0; padding:8px 12px; border-radius:99px; border:none; font-size:11.5px; font-weight:800; color:var(--primary); background:var(--primary-light); }
+.qkm svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.qkm:active { transform:scale(.95); }
+.kms.stale .qkm { color:#fff; background:var(--wa-bg); box-shadow:0 2px 6px rgba(217,119,6,.3); }
+
+#kmModal .modal-card { max-width:380px; }
+.km-veh { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.km-vn { font-size:14px; font-weight:800; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.km-cur { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; padding:10px 12px; margin-bottom:14px; border-radius:12px; background:var(--bg-subtle); font-size:12px; color:var(--text-muted); font-weight:600; }
+.km-cur b { font-size:16px; font-weight:800; color:var(--text-main); font-variant-numeric:tabular-nums; }
+.km-cur em { font-style:normal; font-size:11px; }
+.km-input { font-size:26px !important; font-weight:800; text-align:center; min-height:56px !important; letter-spacing:.5px; }
+.km-quick { justify-content:center; margin-top:10px; }
+.km-note { margin-top:10px; padding:9px 12px; border-radius:12px; font-size:12px; line-height:1.45; font-weight:600; }
+.km-note.info { background:rgba(22,163,74,.11); color:var(--ok-bg); }
+.km-note.warn { background:rgba(217,119,6,.14); color:var(--wa-bg); }
+.km-note[hidden] { display:none; }
+
 /* ===== Data & Cadangan (di Pengaturan) ===== */
 .ds-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
 .ds-stat { background:var(--bg-subtle); border-radius:12px; padding:9px 6px; text-align:center; }
@@ -815,6 +841,24 @@ body.dragging { -webkit-user-select: none; user-select: none; }
   </div>
   <div class="set-foot">Rawat Kendaraan &amp; Status SIM</div>
 </aside>
+
+<!-- Dialog Update KM cepat -->
+<div id="kmModal" class="modal-overlay" role="dialog" aria-label="Update KM">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title"><span class="mt-ic"><svg viewBox="0 0 24 24"><path d="M12 14l4-4"/><path d="M3.34 19a10 10 0 1117.32 0"/></svg></span>Update KM</h3>
+      <button type="button" class="modal-close" id="kmClose" aria-label="Tutup">✕</button>
+    </div>
+    <div class="km-veh"><div class="km-vn" id="kmVName"></div><span class="plate" id="kmVPlate"></span></div>
+    <div class="km-cur"><span>KM saat ini</span><b id="kmCur"></b><em id="kmCurAgo"></em></div>
+    <label class="sim-field"><span>KM terbaru di spidometer</span>
+      <input id="kmNew" class="rp km-input" type="text" inputmode="numeric" autocomplete="off" placeholder="0">
+    </label>
+    <div class="sim-quick km-quick"><button type="button" data-kmadd="50">+50</button><button type="button" data-kmadd="100">+100</button><button type="button" data-kmadd="250">+250</button></div>
+    <div class="km-note" id="kmNote" hidden></div>
+    <div class="im-actions"><button type="button" class="btn-outline" id="kmCancel">Batal</button><button type="button" class="p" id="kmSave">Simpan KM</button></div>
+  </div>
+</div>
 
 <!-- Dialog konfirmasi Import -->
 <div id="importModal" class="modal-overlay" role="dialog" aria-label="Import data">
@@ -2067,12 +2111,16 @@ function home() {
     var t = L[0] || null;
     var urgent = p.k === 'er' || (t && t.lv === 'er');
     var emoji = v.jenis == 'mobil' ? '🚗' : '🏍️';
-    var meta = '🛣️ ' + nk(v.km) + (v.kmTgl ? ' · diperbarui ' + ago(v.kmTgl) : '');
+    var kmHas = !!v.kmTgl, kmStale = !kmHas || dayDiff(v.kmTgl) > 14;
+    var kmStrip = '<div class="kms' + (kmStale ? ' stale' : '') + '">' +
+      '<div class="kms-t"><div class="kms-r"><span class="kms-ic"><svg viewBox="0 0 24 24"><path d="M12 14l4-4"/><path d="M3.34 19a10 10 0 1117.32 0"/></svg></span><b>' + nk(v.km) + '</b></div>' +
+      '<span class="kms-s">' + (kmHas ? 'Diperbarui ' + ago(v.kmTgl) : 'Belum pernah diperbarui') + '</span></div>' +
+      '<button type="button" class="qkm" data-qkm="' + v.id + '" aria-label="Update KM ' + E(v.motor || '') + '">' + SIM_ICON.edit + 'Update KM</button></div>';
     var bdg = function(k, nama, txt) { return '<span class="b bb ' + k + '"><span class="bn">' + E(nama) + '</span><span class="bs">' + txt + '</span></span>'; };
     var badges = '<div class="vbadges">' +
       bdg(p.k, 'Pajak:', p.t) +
       (t ? bdg(t.lv, t.c.name + ':', t.s.t) : '<span class="b nu">Komponen belum diatur</span>') +
-    '</div>';
+    '</div>' + kmStrip;
 
     if (homeView == 'big') {
       var photo = i.foto ? '<img src="' + i.foto + '" alt="">' : '<div class="vph-e">' + emoji + '</div>';
@@ -2080,7 +2128,7 @@ function home() {
         '<div class="vph">' + photo + '<span class="plate">' + E(i.plat || 'NO PLAT') + '</span></div>' +
         '<div class="vbody">' +
           '<div class="vtop"><b class="vname">' + E(v.motor || 'Belum diberi nama') + '</b><span class="vgo"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></div>' +
-          '<div class="mu vmeta">' + meta + '</div>' + badges +
+          badges +
         '</div></div>';
     }
 
@@ -2090,14 +2138,13 @@ function home() {
         '<div style="min-width:0; flex:1;">' +
           '<b class="vname">' + E(v.motor || 'Belum diberi nama') + '</b>' +
           '<div><span class="plate">' + E(i.plat || 'NO PLAT') + '</span></div>' +
-          '<div class="mu">' + meta + '</div>' +
         '</div>' +
         '<span class="vgo"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>' +
       '</div>' + badges + '</div>';
   }); }).join('');
 
   return '<div class="row" style="margin-bottom:10px;">' +
-    '<div><b style="font-size:16px;">Kendaraan Saya</b><div class="mu">' + V.length + ' kendaraan</div></div>' +
+    '<div><b style="font-size:16px;">Kendaraan Saya</b><div class="mu">' + V.length + ' kendaraan' + (function() { var n = V.filter(function(x) { return !x.kmTgl || dayDiff(x.kmTgl) > 14; }).length; return n ? '<span class="kms-warn"> · ' + n + ' perlu update KM</span>' : ''; })() + '</div></div>' +
     '<div class="seg"><button data-view="list" class="' + (homeView == 'list' ? 'on' : '') + '" aria-label="Tampilan list" title="List">' + IC_LIST + '</button><button data-view="big" class="' + (homeView == 'big' ? 'on' : '') + '" aria-label="Tampilan besar" title="Besar">' + IC_CARD + '</button></div>' +
   '</div>' +
   (cards || '<div class="c mu">Belum ada kendaraan. Tambahkan motor atau mobil Anda.</div>') +
@@ -2537,6 +2584,9 @@ document.addEventListener('click', function(e) {
     scrollTo(0, 0);
     return;
   }
+
+  var qk = e.target.closest ? e.target.closest('[data-qkm]') : null;
+  if (qk) { openKmModal(qk.getAttribute('data-qkm')); return; }
 
   var pk = e.target.closest ? e.target.closest('[data-pick]') : null;
   if (pk) {
@@ -3237,6 +3287,54 @@ document.addEventListener('change', function(e) {
   if (t && t.id === 'importFile' && t.files && t.files[0]) { handleImportFile(t.files[0]); t.value = ''; }
 });
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeImportModal(); });
+
+/* ===== v9: Update KM cepat ===== */
+var _kmV = null;
+function kmCheck() {
+  var inp = document.getElementById('kmNew'), note = document.getElementById('kmNote'), btn = document.getElementById('kmSave');
+  if (!_kmV) return;
+  var cur = +_kmV.km || 0, raw = inp.value, n = pn(raw);
+  btn.textContent = 'Simpan KM';
+  if (raw === '') { note.hidden = true; return; }
+  if (n < cur) { note.hidden = false; note.className = 'km-note warn'; note.textContent = 'KM lebih kecil dari KM saat ini (' + nk(cur) + '). Pastikan angkanya benar.'; btn.textContent = 'Tetap simpan'; }
+  else if (n > cur) { note.hidden = false; note.className = 'km-note info'; note.textContent = 'Bertambah ' + (n - cur).toLocaleString('id-ID') + ' km sejak update terakhir.'; }
+  else { note.hidden = false; note.className = 'km-note info'; note.textContent = 'KM sama dengan sebelumnya. Tanggal update tetap akan diperbarui.'; }
+}
+function openKmModal(id) {
+  var v = R.vehicles.find(function(x) { return x.id == id; }); if (!v) return;
+  _kmV = v;
+  document.getElementById('kmVName').textContent = v.motor || 'Belum diberi nama';
+  document.getElementById('kmVPlate').textContent = (v.info && v.info.plat) || 'NO PLAT';
+  document.getElementById('kmCur').textContent = nk(v.km);
+  document.getElementById('kmCurAgo').textContent = v.kmTgl ? 'diperbarui ' + ago(v.kmTgl) : 'belum pernah diperbarui';
+  var inp = document.getElementById('kmNew'); inp.value = fn(v.km);
+  document.getElementById('kmNote').hidden = true; document.getElementById('kmSave').textContent = 'Simpan KM';
+  document.getElementById('kmModal').classList.add('show');
+  setTimeout(function() { inp.focus(); inp.select(); }, 120);
+}
+function closeKmModal() { var m = document.getElementById('kmModal'); if (m) m.classList.remove('show'); _kmV = null; }
+function saveKmModal() {
+  if (!_kmV) return;
+  var inp = document.getElementById('kmNew'); if (inp.value === '') { inp.focus(); return; }
+  var n = pn(inp.value), v = _kmV;
+  v.km = n; v.kmTgl = today();
+  save(); closeKmModal(); draw();
+  toast('ok', 'KM Diperbarui', (v.motor || 'Kendaraan') + ' · ' + nk(n));
+}
+document.addEventListener('click', function(e) {
+  var t = e.target; if (!t || !t.closest) return;
+  var add = t.closest('[data-kmadd]');
+  if (add) { var inp = document.getElementById('kmNew'), cur = _kmV ? (+_kmV.km || 0) : 0; inp.value = fn((pn(inp.value) || cur) + (+add.getAttribute('data-kmadd'))); kmCheck(); return; }
+  if (t.closest('#kmSave')) { saveKmModal(); return; }
+  if (t.closest('#kmClose') || t.closest('#kmCancel') || t.id === 'kmModal') { closeKmModal(); return; }
+});
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.id === 'kmNew') { e.target.value = fn(e.target.value); kmCheck(); }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeKmModal();
+  if (e.key === 'Enter' && e.target && e.target.id === 'kmNew') { e.preventDefault(); saveKmModal(); }
+});
 </script>
 </body>
 </html>
