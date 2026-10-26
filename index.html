@@ -352,6 +352,37 @@ details[open] summary { margin-bottom: 6px; }
 .set-foot { padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px)); text-align:center; font-size:10.5px; color:var(--text-muted); border-top:1px solid var(--border-color); }
 body.set-open { overflow:hidden; }
 
+/* ===== Catatan kendaraan ===== */
+.nt-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.nt-ttl { display:flex; align-items:center; gap:9px; font-size:13px; font-weight:800; }
+.nt-ic { width:30px; height:30px; border-radius:10px; display:grid; place-items:center; background:var(--primary-light); color:var(--primary); }
+.nt-ic svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.nt-cnt { font-size:11px; font-weight:700; color:var(--text-muted); background:var(--bg-subtle); border-radius:99px; padding:2px 8px; }
+.nt-add { display:inline-flex; align-items:center; gap:5px; min-height:0; padding:8px 13px; border-radius:99px; border:none; font-size:11.5px; font-weight:800; color:var(--primary); background:var(--primary-light); }
+.nt-add svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2.6; stroke-linecap:round; }
+.nt-list { margin-top:8px; }
+.nt-row { display:flex; align-items:flex-start; gap:10px; padding:11px 0; border-top:1px solid var(--border-color); cursor:pointer; }
+.nt-row:first-child { border-top:0; }
+.nt-row:active { opacity:.7; }
+.nt-main { flex:1; min-width:0; }
+.nt-t { font-size:11.5px; font-weight:700; color:var(--text-muted); }
+.nt-v { margin-top:2px; font-size:14px; font-weight:700; line-height:1.45; white-space:pre-wrap; word-break:break-word; }
+.nt-ed { flex:none; width:28px; height:28px; border-radius:9px; display:grid; place-items:center; color:var(--text-muted); background:var(--bg-subtle); }
+.nt-ed svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.nt-empty { margin-top:10px; padding:14px; border:1.5px dashed var(--border-color); border-radius:14px; text-align:center; }
+.nt-empty p { margin:0 0 10px; font-size:12px; line-height:1.5; color:var(--text-muted); }
+.nt-chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+.nt-chip { min-height:0; padding:7px 12px; border-radius:99px; border:1px solid var(--border-color); background:var(--bg-card); font-size:11.5px; font-weight:700; color:var(--text-main); }
+#noteModal .modal-card { max-width:400px; max-height:calc(100dvh - 32px); overflow-y:auto; }
+.nt-for { margin:-4px 0 12px; font-size:12px; font-weight:600; color:var(--text-muted); }
+.nt-ta { width:100%; min-height:100px; padding:10px 12px; border-radius:12px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main); font:inherit; font-size:14px; line-height:1.5; resize:vertical; }
+.nt-ta:focus { outline:2px solid var(--primary); outline-offset:-1px; border-color:var(--primary); }
+.nt-actions { display:grid; grid-template-columns:1fr 1.4fr; gap:8px; margin-top:14px; }
+.nt-actions.has-del { grid-template-columns:auto 1fr 1.3fr; }
+.nt-actions button { min-height:44px; border-radius:12px; font-size:13px; }
+.nt-del { color:var(--er-bg); border-color:var(--er-bg); padding:0 14px; }
+.nt-del.sure { background:var(--er-bg); color:#fff; }
+
 /* ===== Bar Selesai (menempel di bawah saat mengubah data kendaraan) ===== */
 .editbar { position:sticky; bottom:calc(72px + env(safe-area-inset-bottom,0px)); z-index:20; display:flex; align-items:center; gap:12px; margin-top:14px; padding:10px 10px 10px 14px;
   border-radius:18px; background:var(--bg-card); border:1.5px solid var(--border-color); box-shadow:0 8px 24px rgba(0,0,0,.16); transition:border-color .2s ease; }
@@ -940,6 +971,21 @@ body.dragging { -webkit-user-select: none; user-select: none; }
   <div class="set-foot">Rawat Kendaraan &amp; Status SIM</div>
 </aside>
 
+<!-- Dialog Catatan kendaraan -->
+<div id="noteModal" class="modal-overlay" role="dialog" aria-label="Catatan kendaraan">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title"><span class="mt-ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></span><span id="ntMTitle">Tambah catatan</span></h3>
+      <button type="button" class="modal-close" id="ntClose" aria-label="Tutup">✕</button>
+    </div>
+    <div class="nt-for" id="ntFor"></div>
+    <label class="sim-field"><span>Judul</span><input id="ntTitle" type="text" maxlength="60" autocomplete="off" placeholder="Contoh: Tekanan angin depan"></label>
+    <div class="sim-quick" id="ntChips"></div>
+    <label class="sim-field" style="display:block; margin-top:12px;"><span>Isi catatan</span><textarea id="ntText" class="nt-ta" maxlength="600" placeholder="Contoh: 29 psi (sendiri), 33 psi (berboncengan)"></textarea></label>
+    <div class="nt-actions" id="ntActions"></div>
+  </div>
+</div>
+
 <!-- Dialog Update KM cepat -->
 <div id="kmModal" class="modal-overlay" role="dialog" aria-label="Update KM">
   <div class="modal-card">
@@ -1271,6 +1317,7 @@ function norm() {
     v.km = +v.km || 0;
     v.kmTgl = v.kmTgl || '';
     v.motor = v.motor || '';
+    v.notes = Array.isArray(v.notes) ? v.notes : [];
     recalcVehicle(v);
   });
 }
@@ -1824,7 +1871,7 @@ function summ() {
     '<b style="font-size:13px;">Perlu diganti berikutnya</b>' +
     (top.length ? '' : '<div class="mu" style="margin-top:6px">Belum ada jadwal komponen.</div>') +
     top.map(function(item) { return '<div class="row" style="margin-top:6px; font-size:13px;"><span>' + E(item.c.name) + '</span><span class="b ' + item.lv + '">' + item.s.t + '</span></div>'; }).join('') +
-  '</div>' +
+  '</div>' + notesCardHTML() +
   '<details class="c"><summary>Detail Dokumen & Kendaraan</summary>' +
     '<div class="g">' +
       '<div><span class="mu">No. Rangka</span><br><b>' + E(i.rangka || '-') + '</b></div>' +
@@ -3656,6 +3703,81 @@ function updateEditBar() {
 }
 document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'hidden' && _dirty) flushDraft(); });
 window.addEventListener('pagehide', function() { if (_dirty) flushDraft(); });
+
+/* ===== v12: Catatan per kendaraan ===== */
+var NOTE_ICON = '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>';
+var NOTE_PRESETS = {
+  motor: ['Ukuran ban depan', 'Ukuran ban belakang', 'Tekanan angin depan', 'Tekanan angin belakang', 'Oli mesin', 'Tipe busi'],
+  mobil: ['Ukuran ban', 'Tekanan angin', 'Oli mesin', 'Oli transmisi', 'Tipe busi', 'Aki']
+};
+var _noteEditId = null, _noteArmT = null;
+function notePresets() { return NOTE_PRESETS[S && S.jenis == 'mobil' ? 'mobil' : 'motor']; }
+function notesCardHTML() {
+  if (!S) return '';
+  var n = Array.isArray(S.notes) ? S.notes : [];
+  var head = '<div class="nt-head"><div class="nt-ttl"><span class="nt-ic">' + NOTE_ICON + '</span>Catatan' + (n.length ? '<span class="nt-cnt">' + n.length + '</span>' : '') +
+    '</div><button type="button" class="nt-add" data-note-add="1">' + SIM_ICON.plus + 'Tambah</button></div>';
+  var body;
+  if (!n.length) {
+    body = '<div class="nt-empty"><p>Simpan info penting sebagai panduan, misalnya ukuran ban, tekanan angin, atau tipe busi.</p><div class="nt-chips">' +
+      ['Ukuran ban', 'Tekanan angin', 'Oli mesin', 'Tipe busi'].map(function(p) { return '<button type="button" class="nt-chip" data-note-add="1" data-note-preset="' + E(p) + '">+ ' + E(p) + '</button>'; }).join('') + '</div></div>';
+  } else {
+    body = '<div class="nt-list">' + n.map(function(x) {
+      return '<div class="nt-row" data-note-edit="' + E(x.id) + '"><div class="nt-main"><div class="nt-t">' + E(x.title) + '</div><div class="nt-v">' + E(x.text) + '</div></div><span class="nt-ed">' + SIM_ICON.edit + '</span></div>';
+    }).join('') + '</div>';
+  }
+  return '<div class="c nt-card">' + head + body + '</div>';
+}
+function ntDisarm() { clearTimeout(_noteArmT); var d = document.getElementById('ntDel'); if (d) { d.classList.remove('sure'); d.textContent = 'Hapus'; } }
+function openNoteModal(id, preset) {
+  if (!S) return;
+  var n = id ? (S.notes || []).find(function(x) { return x.id === id; }) : null;
+  if (id && !n) return;
+  _noteEditId = n ? n.id : null;
+  document.getElementById('ntMTitle').textContent = n ? 'Ubah catatan' : 'Tambah catatan';
+  document.getElementById('ntFor').textContent = 'Untuk: ' + (S.motor || 'Kendaraan ini');
+  var ti = document.getElementById('ntTitle'), tx = document.getElementById('ntText');
+  ti.value = n ? n.title : (preset || ''); tx.value = n ? n.text : '';
+  document.getElementById('ntChips').innerHTML = n ? '' : notePresets().map(function(p) { return '<button type="button" data-ntpreset="' + E(p) + '">' + E(p) + '</button>'; }).join('');
+  var act = document.getElementById('ntActions');
+  act.className = 'nt-actions' + (n ? ' has-del' : '');
+  act.innerHTML = (n ? '<button type="button" class="btn-outline nt-del" id="ntDel">Hapus</button>' : '') +
+    '<button type="button" class="btn-outline" id="ntCancel">Batal</button><button type="button" class="p" id="ntSave">Simpan</button>';
+  document.getElementById('noteModal').classList.add('show');
+  setTimeout(function() { (preset || n ? tx : ti).focus(); }, 120);
+}
+function closeNoteModal() { clearTimeout(_noteArmT); var m = document.getElementById('noteModal'); if (m) m.classList.remove('show'); _noteEditId = null; }
+function saveNote() {
+  if (!S) return;
+  var title = document.getElementById('ntTitle').value.trim(), text = document.getElementById('ntText').value.trim();
+  if (!title && !text) { document.getElementById('ntTitle').focus(); return; }
+  if (!title) title = 'Catatan';
+  S.notes = Array.isArray(S.notes) ? S.notes : [];
+  var cur = _noteEditId ? S.notes.find(function(x) { return x.id === _noteEditId; }) : null;
+  if (cur) { cur.title = title; cur.text = text; } else { S.notes.push({ id: uid(), title: title, text: text }); }
+  save(); closeNoteModal(); draw();
+}
+function deleteNote() {
+  if (!S || !_noteEditId) return;
+  var id = _noteEditId;
+  S.notes = (S.notes || []).filter(function(x) { return x.id !== id; });
+  save(); closeNoteModal(); draw();
+}
+document.addEventListener('click', function(e) {
+  var t = e.target; if (!t || !t.closest) return;
+  var add = t.closest('[data-note-add]'); if (add) { openNoteModal(null, add.getAttribute('data-note-preset') || ''); return; }
+  var ed = t.closest('[data-note-edit]'); if (ed) { openNoteModal(ed.getAttribute('data-note-edit')); return; }
+  var ch = t.closest('[data-ntpreset]'); if (ch) { document.getElementById('ntTitle').value = ch.getAttribute('data-ntpreset'); document.getElementById('ntText').focus(); return; }
+  if (t.closest('#ntSave')) { saveNote(); return; }
+  var dl = t.closest('#ntDel');
+  if (dl) {
+    if (dl.classList.contains('sure')) { deleteNote(); }
+    else { dl.classList.add('sure'); dl.textContent = 'Yakin hapus?'; clearTimeout(_noteArmT); _noteArmT = setTimeout(ntDisarm, 4000); }
+    return;
+  }
+  if (t.closest('#ntClose') || t.closest('#ntCancel') || t.id === 'noteModal') { closeNoteModal(); return; }
+});
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeNoteModal(); });
 </script>
 </body>
 </html>
